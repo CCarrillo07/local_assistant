@@ -1,4 +1,7 @@
 from llm.base import LLMProvider, Message
+from logger import get_logger
+
+logger = get_logger(__name__)
 
 class Assistant:
     
@@ -18,19 +21,24 @@ class Assistant:
         ]
     
     def send_message(self, user_message: str):
-        
-        self.messages.append(
-            {
+
+        user_entry = {
                 "role": "user",
                 "content": user_message
-            }
-        )
+        }
+        
+        self.messages.append(user_entry)
         
         response = ""
         
-        for text in self.llm.stream_chat(self.messages):
-            response += text
-            yield text
+        try:
+            for text in self.llm.stream_chat(self.messages):
+                response += text
+                yield text
+
+        except Exception:
+            self.messages.pop()
+            raise
 
         self.messages.append(
             {
@@ -51,5 +59,7 @@ class Assistant:
                 "content": self.system_prompt
             }
         ]
+
+        logger.info("Conversation reset")
     
     

@@ -1,6 +1,9 @@
 from assistant import Assistant
 from llm.ollama_provider import OllamaProvider
 from config import CONFIG, MODELS, resolve_model
+from logger import get_logger
+
+logger = get_logger(__name__)
 
 SYSTEM_PROMPT = """
 You are a helpful general-purpose personal assistant.
@@ -19,15 +22,18 @@ def main():
         model=current_model,
         host=CONFIG.ollama_host
     )
+
     
     assistant = Assistant(
         llm=provider,
         system_prompt=SYSTEM_PROMPT
     )
-    
-    print("Local AI Assistant")
-    print(f"Model: {current_model}")
-    
+
+    logger.info(
+        "Assistant started with model %s",
+        current_model
+    )
+        
     print("\nCommands:")
     print("/models")
     print("/model <name>")
@@ -46,8 +52,7 @@ def main():
 
         if user_input.lower() == "/reset":
             assistant.reset()
-            print("\nConversation cleared")
-            
+    
             continue
         
         if user_input.lower() == "/models":
@@ -73,20 +78,19 @@ def main():
                 current_model
             )
             
-            print(
-                f"Model changed to: {current_model}"
-            )
-            
-            print("Conversation cleared.")
-            
             continue
 
-        print("\nAssistant: ", end="", flush=True)
+        print("\nAssistant: ")
         
-        for text in assistant.send_message(user_input):
-            print(text, end="", flush=True)
-            
-        print()
+        try:
+            for text in assistant.send_message(user_input):
+                print(text, end="", flush=True)
+                
+            print()
+
+        except Exception as error:
+
+            print(f"\nError: {error}")
         
 if __name__ == "__main__":
     main()

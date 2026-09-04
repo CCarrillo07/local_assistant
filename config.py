@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 
 MODELS = {
-    "fast": "qwen3.5:2b",
-    "main": "llama3.1:latest "
+    "fast": "qwen3.5:2b-q4_K_M",
+    "main": "qwen3.5:2b-q8_0"
 }
 
 @dataclass(frozen=True)
