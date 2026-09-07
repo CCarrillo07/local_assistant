@@ -50,7 +50,8 @@ class InMemoryVectorStore:
     def search(
         self,
         query: str,
-        top_k: int = 3
+        top_k: int = 3,
+        min_score: float | None = None
     ) -> list[SearchResult]:
         
         if not self.chunks:
@@ -85,6 +86,11 @@ class InMemoryVectorStore:
             key=lambda result: result.score,
             reverse=True
         )
+
+        if min_score is not None:
+            results = [
+                result for result in results if result.score >= min_score
+            ]
 
         return results[:top_k]
 

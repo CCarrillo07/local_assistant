@@ -9,6 +9,8 @@ MODELS = {
 class AppConfig:
     ollama_host: str = "http://localhost:11434"
     default_model: str = MODELS["main"]
+    rag_top_k: int = 2
+    rag_min_score: float = 0.4
     
 CONFIG = AppConfig()
 

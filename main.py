@@ -147,7 +147,8 @@ def main():
             
             results = vector_store.search(
                 query=user_input,
-                top_k=3
+                top_k=CONFIG.rag_top_k,
+                min_score=CONFIG.rag_min_score
             )
 
             model_message= build_rag_prompt(

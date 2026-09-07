@@ -6,7 +6,14 @@ def build_rag_prompt(
 ) -> str:
     
     if not results:
-        return question
+        return f"""
+    No sufficiently relevant document context was retrieved.
+    
+    Do not answer the question using general knowledge.
+    Reply with exactly:
+
+    The answer could not be found in the documents.
+    """.strip()
 
     context_sections = []
 
