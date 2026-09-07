@@ -151,6 +151,23 @@ def main():
                 min_score=CONFIG.rag_min_score
             )
 
+            if not results:
+
+                response = (
+                    "The answer could not be found "
+                    "in the documents."
+                )
+
+                assistant.record_exchange(
+                    user_message=user_input,
+                    assistant_message=response
+                )
+
+                print("\nAssistant:")
+                print(response)
+
+                continue
+
             model_message= build_rag_prompt(
                 question=user_input,
                 results=results

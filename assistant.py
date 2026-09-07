@@ -75,5 +75,24 @@ class Assistant:
         ]
 
         logger.info("Conversation reset")
+
+    def record_exchange(
+        self,
+        user_message: str,
+        assistant_message: str
+    ) -> None:
+
+        self.messages.extend(
+            [
+                {
+                    "role": "user",
+                    "content" : user_message
+                },
+                {
+                    "role": "assistant",
+                    "content": assistant_message
+                }
+            ]
+        )
     
     
