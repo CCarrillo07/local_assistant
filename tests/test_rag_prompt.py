@@ -29,7 +29,7 @@ class RAGPromptTests(unittest.TestCase):
         ]
         
         prompt = build_rag_prompt(
-            question="What are the fact?",
+            question="What are the facts?",
             results=results
         )
         
@@ -61,7 +61,7 @@ class RAGPromptTests(unittest.TestCase):
                     text="A fact from a text file.",
                     source="notes.txt",
                     page=None,
-                    chunk_index=1
+                    chunk_index=3
                 ),
                 score=0.90
             )

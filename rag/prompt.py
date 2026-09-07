@@ -27,7 +27,7 @@ def build_rag_prompt(
         source_location = chunk.source
 
         if chunk.page is not None:
-            source_location += f" , page {chunk.page}"
+            source_location += f", page {chunk.page}"
 
         context_section = (
             f"[Source {position}: "
