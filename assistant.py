@@ -15,7 +15,7 @@ class Assistant:
         
         self.messages: list[Message] = [
             {
-                "role": "sytem",
+                "role": "system",
                 "content": self.system_prompt
             }
         ]

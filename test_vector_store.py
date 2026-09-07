@@ -2,6 +2,7 @@ from rag.chunker import chunk_documents
 from rag.embedder import OllamaEmbedder
 from rag.loader import load_documents
 from rag.vector_store import InMemoryVectorStore
+from rag.prompt import build_rag_prompt
 
 documents = load_documents("documents")
 
@@ -39,3 +40,13 @@ for position, result in enumerate(
     print(f"Chunk: {chunk.chunk_index}")
     print()
     print(chunk.text)
+
+rag_prompt = build_rag_prompt(
+    question=query,
+    results=results
+)
+
+print("\n" + "=" * 60)
+print("RAG PROMPT")
+print("=" * 60)
+print(rag_prompt)
