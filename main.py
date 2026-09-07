@@ -158,11 +158,6 @@ def main():
                     "in the documents."
                 )
 
-                assistant.record_exchange(
-                    user_message=user_input,
-                    assistant_message=response
-                )
-
                 print("\nAssistant:")
                 print(response)
 
