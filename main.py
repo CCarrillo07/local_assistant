@@ -1,7 +1,12 @@
 from assistant import Assistant
-from llm.ollama_provider import OllamaProvider
 from config import CONFIG, MODELS, resolve_model
+from llm.ollama_provider import OllamaProvider
 from logger import get_logger
+from rag.chunker import chunk_documents
+from rag.embedder import OllamaEmbedder
+from rag.loader import load_documents
+from rag.prompt import build_rag_prompt
+from rag.vector_store import InMemoryVectorStore
 
 logger = get_logger(__name__)
 
@@ -13,6 +18,24 @@ brainstorming, explanations, and everyday questions.
 
 Be clear, accurate, and concise.
 """
+
+def build_vector_store() -> InMemoryVectorStore:
+
+    documents = load_documents("documents")
+
+    chunks = chunk_documents(
+        documents,
+        chunk_size=100,
+        overlap=20
+    )
+
+    embedder = OllamaEmbedder()
+
+    vector_store = InMemoryVectorStore(embedder)
+
+    vector_store.add_chunks(chunks)
+
+    return vector_store
 
 def main():
     
@@ -29,6 +52,9 @@ def main():
         system_prompt=SYSTEM_PROMPT
     )
 
+    vectir_store = None
+    rag_enabled = False
+
     logger.info(
         "Assistant started with model %s",
         current_model
@@ -37,8 +63,11 @@ def main():
     print("\nCommands:")
     print("/models")
     print("/model <name>")
+    print("/rag on")
+    print("/rag off")
+    print("/rag status")
     print("/reset")
-    print("exit")
+    print("/exit")
     
     while True:
         
@@ -47,12 +76,11 @@ def main():
         if not user_input:
             continue
 
-        if user_input.lower() == "/exit":
+        if user_input.lower() in {"exit", "/exit"}:
             break
 
         if user_input.lower() == "/reset":
             assistant.reset()
-    
             continue
         
         if user_input.lower() == "/models":
@@ -80,10 +108,58 @@ def main():
             
             continue
 
+        if user_input.lower() == "/rag on":
+
+            if vector_store is None:
+
+                print("\nLoading and embedding documents...")
+
+                vector_store = build_vector_store()
+
+            rag_enabled = True
+            assistant.reset()
+
+            print("\nRAG model enabled")
+            continue
+
+        if user_input.lower() == "/rag off":
+
+            rag_enabled = False
+            assistant.reset()
+
+            print("\nRAG mode disabled")
+            continue
+
+        if user_input.lower() == "/rag status":
+
+            status = (
+                "enabled"
+                if rag_enabled
+                else "disabled"
+            )
+
+            print(f"RAG mode is {status}")
+            continue
+
+        model_message = None
+
+        if rag_enabled and vector_store is not None:
+            
+            results = vector_store.search(
+                query=user_input,
+                top_k=3
+            )
+
+            model_message= build_rag_prompt(
+                question=user_input,
+                results=results
+            )
+
+
         print("\nAssistant: ")
         
         try:
-            for text in assistant.send_message(user_input):
+            for text in assistant.send_message(user_message=user_input,model_message=model_message):
                 print(text, end="", flush=True)
                 
             print()

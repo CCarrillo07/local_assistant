@@ -20,7 +20,7 @@ class Assistant:
             }
         ]
     
-    def send_message(self, user_message: str, model_message: str | str | None = none):
+    def send_message(self, user_message: str, model_message: str | None = None):
 
         user_entry = {
                 "role": "user",
