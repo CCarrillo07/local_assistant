@@ -119,7 +119,7 @@ def main():
             rag_enabled = True
             assistant.reset()
 
-            print("\nRAG model enabled")
+            print("\nRAG mode enabled")
             continue
 
         if user_input.lower() == "/rag off":
