@@ -52,7 +52,7 @@ def main():
         system_prompt=SYSTEM_PROMPT
     )
 
-    vector_store = InMemoryVectorStore | None = None
+    vector_store: InMemoryVectorStore | None = None
     rag_enabled = False
 
     logger.info(
