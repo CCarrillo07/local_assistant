@@ -20,7 +20,7 @@ class Assistant:
             }
         ]
     
-    def send_message(self, user_message: str):
+    def send_message(self, user_message: str, model_message: str | str | None = none):
 
         user_entry = {
                 "role": "user",
@@ -29,7 +29,21 @@ class Assistant:
         
         self.messages.append(user_entry)
         
-        response = ""
+        message_for_model = (
+            model_message
+            if model_message is not None
+            else user_message
+        )
+
+        request_messages = [
+            *self.messages[:-1],
+            {
+                "role": "user",
+                "content": message_for_model
+            }
+        ]
+
+        response= ""
         
         try:
             for text in self.llm.stream_chat(self.messages):
