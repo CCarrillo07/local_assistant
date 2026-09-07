@@ -12,3 +12,9 @@ class Chunk:
     source: str
     page: int | None
     chunk_index: int
+
+@dataclass
+class SearchResult:
+    chunk: Chunk
+    score: float
+
