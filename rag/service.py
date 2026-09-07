@@ -22,13 +22,13 @@ class RAGService:
     ):
         
         self.document_directory = document_directory
-        self.embeder = embedder
+        self.embedder = embedder
         self.chunk_size = chunk_size
         self.overlap = overlap
         self.top_k = top_k
         self.min_score = min_score
         
-        self.vector_score = InMemoryVectorStore(embedder=embedder)
+        self.vector_store = InMemoryVectorStore(embedder=embedder)
         
         self.initialized = False
 
@@ -62,11 +62,11 @@ class RAGService:
     def build_prompt(
         self,
         question: str
-    ) -> str | None :
+    ) -> str | None:
         
         if not self.initialized:
             raise RuntimeError(
-                "RAG service must be initialzied "
+                "RAG service must be initialized "
                 "before processing questions"
             )
             
