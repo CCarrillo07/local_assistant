@@ -46,7 +46,7 @@ class Assistant:
         response= ""
         
         try:
-            for text in self.llm.stream_chat(self.messages):
+            for text in self.llm.stream_chat(request_messages):
                 response += text
                 yield text
 

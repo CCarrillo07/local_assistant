@@ -33,11 +33,11 @@ def build_rag_prompt(
             context_section
         )
 
-        context = "\n\n".join(
-            context_sections
-        )
+    context = "\n\n".join(
+        context_sections
+    )
 
-        return f"""
+    return f"""
 Answer the question using only the provided context.
 
 Rules:
