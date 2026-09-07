@@ -52,7 +52,7 @@ def main():
         system_prompt=SYSTEM_PROMPT
     )
 
-    vectir_store = None
+    vector_store = None
     rag_enabled = False
 
     logger.info(
