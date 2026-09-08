@@ -45,7 +45,7 @@ class RAGService:
         )
         
         self.vector_score = InMemoryVectorStore(
-            embedder=self.embeder
+            embedder=self.embecder
         )
         
         self.vector_score.add_chunks(
@@ -70,7 +70,7 @@ class RAGService:
                 "before processing questions"
             )
             
-        results = self.vector_score.search(
+        results = self.vector_store.search(
             query=question,
             top_k=self.top_k,
             min_score=self.min_score
