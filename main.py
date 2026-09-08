@@ -2,11 +2,8 @@ from assistant import Assistant
 from config import CONFIG, MODELS, resolve_model
 from llm.ollama_provider import OllamaProvider
 from logger import get_logger
-from rag.chunker import chunk_documents
 from rag.embedder import OllamaEmbedder
-from rag.loader import load_documents
-from rag.prompt import build_rag_prompt
-from rag.vector_store import InMemoryVectorStore
+from rag.service import RAGService
 
 logger = get_logger(__name__)
 
@@ -26,24 +23,6 @@ When the user provides document context:
 Be clear, accurate, and concise.
 """
 
-def build_vector_store() -> InMemoryVectorStore:
-
-    documents = load_documents("documents")
-
-    chunks = chunk_documents(
-        documents,
-        chunk_size=100,
-        overlap=20
-    )
-
-    embedder = OllamaEmbedder()
-
-    vector_store = InMemoryVectorStore(embedder)
-
-    vector_store.add_chunks(chunks)
-
-    return vector_store
-
 def main():
     
     current_model = CONFIG.default_model
@@ -59,7 +38,7 @@ def main():
         system_prompt=SYSTEM_PROMPT
     )
 
-    vector_store: InMemoryVectorStore | None = None
+    rag_service: RAGService | None = None
     rag_enabled = False
 
     logger.info(
@@ -117,11 +96,20 @@ def main():
 
         if user_input.lower() == "/rag on":
 
-            if vector_store is None:
+            if rag_service is None:
 
                 print("\nLoading and embedding documents...")
 
-                vector_store = build_vector_store()
+                rag_service = RAGService(
+                    document_directory="documents",
+                    embedder=OllamaEmbedder(),
+                    chunk_size=100,
+                    overlap=20,
+                    top_k=CONFIG.rag_top_k,
+                    min_score=CONFIG.rag_min_score
+                )
+                
+                rag_service.initialize()
 
             rag_enabled = True
             assistant.reset()
@@ -150,31 +138,23 @@ def main():
 
         model_message = None
 
-        if rag_enabled and vector_store is not None:
+        if rag_enabled and rag_service is not None:
             
-            results = vector_store.search(
-                query=user_input,
-                top_k=CONFIG.rag_top_k,
-                min_score=CONFIG.rag_min_score
+            model_message= rag_service.buildprompt(
+                user_input
             )
-
-            if not results:
-
+            
+            if model_message is None:
+                
                 response = (
                     "The answer could not be found "
                     "in the documents."
                 )
-
+                
                 print("\nAssistant:")
                 print(response)
-
+                
                 continue
-
-            model_message= build_rag_prompt(
-                question=user_input,
-                results=results
-            )
-
 
         print("\nAssistant: ")
         
