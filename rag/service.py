@@ -45,7 +45,7 @@ class RAGService:
         )
         
         self.vector_score = InMemoryVectorStore(
-            embedder=self.embecder
+            embedder=self.embedder
         )
         
         self.vector_score.add_chunks(
