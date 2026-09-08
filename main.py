@@ -140,7 +140,7 @@ def main():
 
         if rag_enabled and rag_service is not None:
             
-            model_message= rag_service.buildprompt(
+            model_message= rag_service.build_prompt(
                 user_input
             )
             
