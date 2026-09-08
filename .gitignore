@@ -24,10 +24,6 @@ env/
 *.log
 logs/
 
-# Local RAG documents / private data
-documents/*
-!documents/.gitkeep
-
 # Local databases and vector stores
 *.db
 *.sqlite
