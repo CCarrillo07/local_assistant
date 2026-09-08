@@ -50,10 +50,11 @@ Answer the question using only the provided context.
 Rules:
 1. Preserve the facts exactly as stated in the context.
 2. Do not add assumptions or unsupported descriptions.
-3. Cite the exact source filename supporting the answer.
+3. Cite sources using only the exact filename and optional page number
+shown in the context. Never create hyperlinks, URLs, directory paths, or other source locations.
 4. Include a page number only when the source metadata
 explicitly contains a page value.
-5. Never interpret a chunk number or source position as page number.
+5. Do not cite source positions or chunk numbers as document locations.
 6. If the answer is not present, say:
 "The answer could not be found in the documents."
 

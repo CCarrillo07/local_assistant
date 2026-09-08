@@ -53,6 +53,11 @@ class RAGPromptTests(unittest.TestCase):
             prompt
         )
         
+        self.assertIn(
+            "Never create hyperlinks, URLs,",
+            prompt
+        )
+        
     def test_does_not_add_page_to_txt_source(self):
         
         results = [
