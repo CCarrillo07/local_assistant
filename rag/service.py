@@ -44,11 +44,11 @@ class RAGService:
             overlap=self.overlap
         )
         
-        self.vector_score = InMemoryVectorStore(
+        self.vector_store = InMemoryVectorStore(
             embedder=self.embedder
         )
         
-        self.vector_score.add_chunks(
+        self.vector_store.add_chunks(
             chunks
         )
         
