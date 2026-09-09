@@ -26,6 +26,7 @@ Be clear, accurate, and concise.
 def main():
     
     current_model = CONFIG.default_model
+    rag_config = CONFIG.rag
     
     provider = OllamaProvider(
         model=current_model,
@@ -101,12 +102,14 @@ def main():
                 print("\nLoading and embedding documents...")
 
                 rag_service = RAGService(
-                    document_directory="documents",
-                    embedder=OllamaEmbedder(),
-                    chunk_size=100,
-                    overlap=20,
-                    top_k=CONFIG.rag_top_k,
-                    min_score=CONFIG.rag_min_score
+                    document_directory=rag_config.document_directory,
+                    embedder=OllamaEmbedder(
+                        model=rag_config.embedding_model
+                    ),
+                    chunk_size=rag_config.chunk_size,
+                    overlap=rag_config.overlap,
+                    top_k=rag_config.top_k,
+                    min_score=rag_config.min_score
                 )
                 
                 rag_service.initialize()
