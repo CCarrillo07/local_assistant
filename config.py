@@ -7,12 +7,15 @@ MODELS = {
 
 @dataclass(frozen=True)
 class RAGConfig:
-    document_directory: str ="documents"
+    document_directory: str = "documents"
     embedding_model: str = "nomic-embed-text:latest"
     chunk_size: int = 100
     overlap: int = 20
     top_k: int = 2
     min_score: float = 0.42
+    available: bool = True
+    mode: str = "manual"
+    allow_user_control: bool = True
 
 @dataclass(frozen=True)
 class AppConfig:
@@ -25,4 +28,4 @@ class AppConfig:
 CONFIG = AppConfig()
 
 def resolve_model(name: str) -> str:
-    return MODELS.get(name,name)
+    return MODELS.get(name, name)

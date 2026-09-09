@@ -27,6 +27,12 @@ def main():
     
     current_model = CONFIG.default_model
     rag_config = CONFIG.rag
+
+    rag_controls_available = (
+        rag_config.available
+        and rag_config.mode == "manual"
+        and rag_config.allow_user_control
+    )
     
     provider = OllamaProvider(
         model=current_model,
@@ -50,9 +56,10 @@ def main():
     print("\nCommands:")
     print("/models")
     print("/model <name>")
-    print("/rag on")
-    print("/rag off")
-    print("/rag status")
+    if rag_controls_available:
+        print("/rag on")
+        print("/rag off")
+        print("/rag status")
     print("/reset")
     print("/exit")
     
@@ -94,6 +101,18 @@ def main():
             )
             
             continue
+
+        rag_commands = {
+            "/rag on",
+            "/rag off",
+            "/rag status"
+        }
+
+        if (user_input.lower() in rag_commands and not rag_controls_available):
+            print("\nRAG controls are not available "
+                  "in this deployment.")
+            continue
+        
 
         if user_input.lower() == "/rag on":
 
