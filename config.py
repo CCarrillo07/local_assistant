@@ -7,15 +7,39 @@ MODELS = {
 
 @dataclass(frozen=True)
 class RAGConfig:
+    available: bool = True
+    mode: str = "auto"
+    allow_user_control: bool = True
     document_directory: str = "documents"
     embedding_model: str = "nomic-embed-text:latest"
     chunk_size: int = 100
     overlap: int = 20
     top_k: int = 2
     min_score: float = 0.42
-    available: bool = True
-    mode: str = "manual"
-    allow_user_control: bool = True
+
+    def __post_init__(self) -> None:
+
+        valid_modes = {
+            "manual",
+            "auto",
+            "required"
+        }
+
+        if self.mode not in valid_modes:
+            raise ValueError(
+                f"Invalid RAG mode: {self.mode}"
+            )
+
+        user_control_expected = (
+            self.available
+            and self.mode == "manual"
+        )
+
+        if self.allow_user_control != user_control_expected:
+            raise ValueError(
+                "allow_user_control must be True only "
+                "when RAG is available and mode is manual"
+            )
 
 @dataclass(frozen=True)
 class AppConfig:
