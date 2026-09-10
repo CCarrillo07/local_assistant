@@ -40,6 +40,29 @@ def main():
 
     rag_service: RAGService | None = None
     rag_enabled = False
+    
+    if rag_config.available:
+        
+        rag_service = RAGService(
+            document_directory=rag_config.document_directory,
+            embedder=OllamaEmbedder(
+                model=rag_config.embedding_model
+            ),
+            chunk_size=rag_config.chunk_size,
+            overlap=rag_config.overlap,
+            top_k=rag_config.top_k,
+            min_score=rag_config.min_score
+        ) 
+        
+        if rag_config.mode == "required":
+            
+            print(
+                "\nLoading and embedding "
+                "RAG documents..."
+            )
+            
+            rag_service.initialize()
+            rag_enabled = True
 
     logger.info(
         "Assistant started with model %s",
@@ -96,26 +119,21 @@ def main():
 
         if user_input.lower() == "/rag on":
 
-            if rag_service is None:
-
-                print("\nLoading and embedding documents...")
-
-                rag_service = RAGService(
-                    document_directory="documents",
-                    embedder=OllamaEmbedder(),
-                    chunk_size=100,
-                    overlap=20,
-                    top_k=CONFIG.rag_top_k,
-                    min_score=CONFIG.rag_min_score
+            if (rag_service is not None
+                and not rag_service.initialized   
+            ):
+                print(
+                    "\nLoading and embedding "
+                    "documents..."
                 )
                 
                 rag_service.initialize()
-
-            rag_enabled = True
-            assistant.reset()
-
-            print("\nRAG mode enabled")
-            continue
+                
+                rag_enabled = True
+                assistant.reset()
+                
+                print("\nRAG mode enabled")
+                continue
 
         if user_input.lower() == "/rag off":
 
