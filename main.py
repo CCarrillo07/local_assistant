@@ -139,9 +139,12 @@ def main():
 
         if user_input.lower() == "/rag on":
 
-            if (rag_service is not None
-                and not rag_service.initialized   
-            ):
+            if rag_service is None:
+                print("\nRAG service is not available.")
+                continue
+            
+            if not rag_service.initialized:
+                
                 print(
                     "\nLoading and embedding "
                     "documents..."
@@ -149,11 +152,11 @@ def main():
                 
                 rag_service.initialize()
                 
-                rag_enabled = True
-                assistant.reset()
+            rag_enabled = True
+            assistant.reset()
                 
-                print("\nRAG mode enabled")
-                continue
+            print("\nRAG mode enabled")
+            continue
 
         if user_input.lower() == "/rag off":
 
