@@ -61,7 +61,7 @@ def main():
             min_score=rag_config.min_score
         ) 
         
-        if rag_config.mode == "required":
+        if rag_config.mode in {"auto","required"}:
             
             print(
                 "\nLoading and embedding "
@@ -187,15 +187,22 @@ def main():
             
             if model_message is None:
                 
-                response = (
-                    "The answer could not be found "
-                    "in the documents."
-                )
+                if rag_config.mode == "auto":
+                    logger.info(
+                        "No relevant RAG context found; "
+                        "using the general assistant"
+                    )
                 
-                print("\nAssistant:")
-                print(response)
+                else:
+                    response = (
+                        "The answer could not be found "
+                        "in the documents."
+                    )
                 
-                continue
+                    print("\nAssistant:")
+                    print(response)
+                
+                    continue
 
         print("\nAssistant: ")
         

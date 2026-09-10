@@ -161,9 +161,9 @@ class MainRAGModeTest(unittest.TestCase):
         
         mock_assistant.send_message.assert_not_called()
         
-        mock_print.asser_any_call(
+        mock_print.assert_any_call(
             "The answer could not be found "
-            "in teh documents."
+            "in the documents."
         )
     
         

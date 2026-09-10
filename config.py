@@ -8,8 +8,8 @@ MODELS = {
 @dataclass(frozen=True)
 class RAGConfig:
     available: bool = True
-    mode: str = "manual"
-    allow_user_control: bool = True
+    mode: str = "auto"
+    allow_user_control: bool = False
     document_directory: str = "documents"
     embedding_model: str = "nomic-embed-text:latest"
     chunk_size: int = 100
