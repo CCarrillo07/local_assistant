@@ -45,3 +45,9 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+# Local RAG documents / private data
+documents/*
+!documents/.gitkeep
+!documents/rag_test_document.pdf
+!documents/rag_test_notes.txt
