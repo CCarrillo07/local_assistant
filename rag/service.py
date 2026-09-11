@@ -1,3 +1,5 @@
+import hashlib
+import json
 from pathlib import Path
 
 from logger import get_logger
@@ -40,8 +42,94 @@ class RAGService:
         
         self.initialized = False
 
-    def initialize(self) -> None:
+    def _calculate_index_fingerprint(self) -> str:
+        """Create an identifier for the documents and RAG configuration."""
         
+        document_directory = Path(
+            self.document_directory
+        )
+        
+        fingerprint_data = {
+            "chunk_size": self.chunk_size,
+            "overlap": self.overlap,
+            "embedding_model": getattr(
+                self.embedder,
+                "model",
+                self.embedder.__class__.__name__
+            )
+        }
+        
+        hasher = hashlib.sha256()
+        
+        hasher.update(
+            json.dumps(
+                fingerprint_data,
+                sort_keys=True
+            ).encode("utf-8")
+        )
+        
+        supported_files = sorted(
+            (
+                path
+                for path in document_directory.rglob("*")
+                if (
+                    path.is_file()
+                    and path.suffix.lower() in {".pdf", ".txt"}
+                )
+            ),
+            key=lambda path: path.as_posix().lower()
+        )
+        
+        for path in supported_files:
+            
+            relative_path = path.relative_to(
+                document_directory
+            )
+            
+            hasher.update(
+                relative_path.as_posix().encode("utf-8")
+            )
+            
+            hasher.update(
+                path.read_bytes()
+            )
+            
+        return hasher.hexdigest()
+    
+    def initialize(self) -> None:
+       
+        fingerprint = None
+       
+        if self.index_path is not None:
+           
+           fingerprint = (
+               self._calculate_index_fingerprint()
+           )
+           
+           if self.index_path.exists():
+               
+               metadata = self.vector_store.load(
+                   self.index_path
+               )
+               
+               if (
+                   metadata.get("fingerprint") == fingerprint
+               ):
+                   self.initialized = True
+
+                   logger.info(
+                       "RAG service initialized from "
+                       "persisted index with %s chunks",
+                       len(self.vector_store.chunks)
+                   )
+                   
+                   return
+               
+               logger.info(
+                   "Persisted RAG index is outdated; "
+                   "rebuilding"
+               )
+               
         documents = load_documents(
             self.document_directory
         )
@@ -62,15 +150,18 @@ class RAGService:
         
         if self.index_path is not None:
             self.vector_store.save(
-                self.index_path
+                self.index_path,
+                metadata={
+                    "fingerprint": fingerprint
+                }
             )
-        
+            
         self.initialized = True
-
         logger.info(
             "RAG service initialized with %s chunks",
             len(chunks)
         )
+       
         
     def build_prompt(
         self,
