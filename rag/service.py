@@ -15,6 +15,7 @@ class RAGService:
         self,
         document_directory: str | Path,
         embedder: OllamaEmbedder,
+        index_path: str | Path | None = None,
         chunk_size: int = 100,
         overlap: int = 20,
         top_k: int = 2,
@@ -22,6 +23,13 @@ class RAGService:
     ):
         
         self.document_directory = document_directory
+        
+        self.index_path = (
+            Path(index_path)
+            if index_path is not None
+            else None
+        )
+        
         self.embedder = embedder
         self.chunk_size = chunk_size
         self.overlap = overlap
@@ -51,6 +59,11 @@ class RAGService:
         self.vector_store.add_chunks(
             chunks
         )
+        
+        if self.index_path is not None:
+            self.vector_store.save(
+                self.index_path
+            )
         
         self.initialized = True
 

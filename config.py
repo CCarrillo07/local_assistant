@@ -11,6 +11,7 @@ class RAGConfig:
     mode: str = "manual"
     allow_user_control: bool = True
     document_directory: str = "documents"
+    index_path: str = "storage/rag_index.npz"
     embedding_model: str = "nomic-embed-text:latest"
     chunk_size: int = 100
     overlap: int = 20

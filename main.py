@@ -59,6 +59,7 @@ def main():
 
         rag_service = RAGService(
             document_directory=rag_config.document_directory,
+            index_path=rag_config.index_path,
             embedder=OllamaEmbedder(
                 model=rag_config.embedding_model
             ),
