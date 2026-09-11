@@ -59,7 +59,8 @@ class InMemoryVectorStore:
         
     def save(
         self,
-        index_path: str | Path
+        index_path: str | Path,
+        metadata: dict[str, object] | None = None
     ) -> None:
         """Save chunks and vectors to a compressed local index."""
         
@@ -103,7 +104,8 @@ class InMemoryVectorStore:
             np.savez_compressed(
                 index_file,
                 chunks_json=json.dumps(chunk_data),
-                vectors=vectors
+                vectors=vectors,
+                metadata_json=json.dumps(metadata or {})
             )
 
         logger.info(
@@ -115,7 +117,7 @@ class InMemoryVectorStore:
     def load(
         self,
         index_path: str | Path
-    ) -> None:
+    ) -> dict[str, object]:
         """Load chunks and vectors from a compressed local index."""
 
         path = Path(index_path)
@@ -127,6 +129,13 @@ class InMemoryVectorStore:
             path,
             allow_pickle=False
         ) as index:
+            
+            if "metadata_json" in index.files:
+                metadata = json.loads(
+                    str(index["metadata_json"].item())
+                )
+            else:
+                metadata = {}
 
             # NumPy returns the stored JSON value as a zero-dimensional array.
             # item() extracts its single value, str() makes it a Python string,
@@ -168,6 +177,8 @@ class InMemoryVectorStore:
             len(self.chunks),
             path
         )
+        
+        return metadata
         
     def search(
         self,
