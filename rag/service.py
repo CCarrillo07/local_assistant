@@ -43,9 +43,7 @@ class RAGService:
         self.overlap = overlap
         self.top_k = top_k
         self.min_score = min_score
-        
-        self.vector_store = InMemoryVectorStore(embedder=embedder)
-        
+                
         self.initialized = False
 
     def _calculate_index_fingerprint(self) -> str:
@@ -117,6 +115,8 @@ class RAGService:
                 "persisted index with %s chunks",
                 self.vector_store.size
             )
+            
+            return
                                   
         documents = load_documents(
             self.document_directory

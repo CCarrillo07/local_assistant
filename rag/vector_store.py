@@ -26,9 +26,6 @@ class InMemoryVectorStore(VectorStore):
             else None
         )
         
-        self.chunks: list[Chunk] = []
-        self.vectors: list[np.ndarray] = []
-
         # These lists are parallel: chunks[0] describes vectors[0], and so on.
         # Keeping them aligned is essential for returning the correct source
         # after a similarity search.
