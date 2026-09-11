@@ -1,3 +1,7 @@
+import json
+from dataclasses import asdict
+from pathlib import Path
+
 import numpy as np
 
 from logger import get_logger
@@ -46,7 +50,95 @@ class InMemoryVectorStore:
             "Added %s chunks to the vector store",
             len(chunks)
         )
-
+        
+    def save(
+        self,
+        index_path: str | Path
+    ) -> None:
+        """Save chunks and vectors to a compressed local index."""
+        
+        if len(self.chunks) != len(self.vectors):
+            raise RuntimeError(
+                "The number of chunks and vectors must match"
+            )
+            
+        path = Path(index_path)
+        
+        path.parent.mkdir(
+            parents=True,
+            exist_ok=True
+        )
+        
+        chunk_data = [
+            asdict(chunk)
+            for chunk in self.chunks
+        ]
+        
+        if self.vectors:
+            vectors = np.stack(
+                self.vectors
+            )
+        else:
+            vectors = np.empty(
+                (0,0),
+                dtype=np.float32
+            )
+            
+        with path.open("wb") as index_file:
+            np.savez_compressed(
+                index_file,
+                chunks_json=json.dumps(chunk_data),
+                vectors=vectors
+            )
+            
+        logger.info(
+            "Saved %s chunks to index: %s",
+            len(self.chunks),
+            path
+        )
+        
+    def load(
+        self,
+        index_path: str | Path
+    ) -> None:
+        """Load chunks and vectors from a compressed local index."""
+        
+        path = Path(index_path)
+        
+        with np.load(
+            path,
+            allow_pickle=False
+        ) as index:
+            chunk_data = json.loads(
+                str(index["chunks_json"].item())
+            )
+            
+            vectors = np.array(
+                index["vectors"],
+                dtype=np.float32
+            )
+            
+        if len(chunk_data) != len(vectors):
+            raise ValueError(
+                "The stored chunks and vectors do not match"
+            )
+            
+        self.chunks = [
+            Chunk(**data)
+            for data in chunk_data
+        ]
+        
+        self.vectors = [
+            vector.copy()
+            for vector in vectors
+        ]
+        
+        logger.info(
+            "Loaded %s chunks from index: %s",
+            len(self.chunks),
+            path    
+        )
+        
     def search(
         self,
         query: str,
