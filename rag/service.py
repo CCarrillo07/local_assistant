@@ -8,6 +8,7 @@ from rag.embedder import OllamaEmbedder
 from rag.loader import load_documents
 from rag.prompt import build_rag_prompt
 from rag.vector_store import InMemoryVectorStore
+from rag.vector_store import VectorStore
 
 logger = get_logger(__name__)
 
@@ -18,6 +19,7 @@ class RAGService:
         document_directory: str | Path,
         embedder: OllamaEmbedder,
         index_path: str | Path | None = None,
+        vector_store: VectorStore | None = None,
         chunk_size: int = 100,
         overlap: int = 20,
         top_k: int = 2,
@@ -26,11 +28,15 @@ class RAGService:
         
         self.document_directory = document_directory
         
-        self.index_path = (
-            Path(index_path)
-            if index_path is not None
-            else None
+        self.vector_store = (
+            vector_store 
+            if vector_store is not None
+            else InMemoryVectorStore(
+                embedder=embedder,
+                index_path=index_path
+            )
         )
+        
         
         self.embedder = embedder
         self.chunk_size = chunk_size
@@ -98,38 +104,20 @@ class RAGService:
     
     def initialize(self) -> None:
        
-        fingerprint = None
-       
-        if self.index_path is not None:
-           
-           fingerprint = (
-               self._calculate_index_fingerprint()
-           )
-           
-           if self.index_path.exists():
-               
-               metadata = self.vector_store.load(
-                   self.index_path
-               )
-               
-               if (
-                   metadata.get("fingerprint") == fingerprint
-               ):
-                   self.initialized = True
+        fingerprint = self._calculate_index_fingerprint()
+        
+        # The vector-store implementation decides how its persisted index
+        # is restored. RAGService does not need to know whether it uses
+        # as NPZ file, Qdrant, or another storage system.
+        if self.vector_store.restore(fingerprint):
+            self.initialized = True
 
-                   logger.info(
-                       "RAG service initialized from "
-                       "persisted index with %s chunks",
-                       len(self.vector_store.chunks)
-                   )
-                   
-                   return
-               
-               logger.info(
-                   "Persisted RAG index is outdated; "
-                   "rebuilding"
-               )
-               
+            logger.info(
+                "RAG service initialized from "
+                "persisted index with %s chunks",
+                self.vector_store.size
+            )
+                                  
         documents = load_documents(
             self.document_directory
         )
@@ -140,29 +128,18 @@ class RAGService:
             overlap=self.overlap
         )
         
-        self.vector_store = InMemoryVectorStore(
-            embedder=self.embedder
+        self.vector_store.rebuild(
+            chunks=chunks,
+            fingerprint=fingerprint
         )
         
-        self.vector_store.add_chunks(
-            chunks
-        )
-        
-        if self.index_path is not None:
-            self.vector_store.save(
-                self.index_path,
-                metadata={
-                    "fingerprint": fingerprint
-                }
-            )
-            
         self.initialized = True
+
         logger.info(
             "RAG service initialized with %s chunks",
             len(chunks)
         )
        
-        
     def build_prompt(
         self,
         question: str

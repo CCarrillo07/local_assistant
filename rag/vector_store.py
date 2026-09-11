@@ -15,15 +15,30 @@ class InMemoryVectorStore(VectorStore):
 
     def __init__(
         self,
-        embedder: OllamaEmbedder
+        embedder: OllamaEmbedder,
+        index_path: str | Path | None = None
     ):
         self.embedder = embedder
+        
+        self.index_path = (
+            Path(index_path)
+            if index_path is not None
+            else None
+        )
+        
+        self.chunks: list[Chunk] = []
+        self.vectors: list[np.ndarray] = []
 
         # These lists are parallel: chunks[0] describes vectors[0], and so on.
         # Keeping them aligned is essential for returning the correct source
         # after a similarity search.
         self.chunks: list[Chunk] = []
         self.vectors: list[np.ndarray] = []
+
+    @property
+    def size(self) -> int:
+        """Return the number of indexed chunks."""
+        return len(self.chunks)
 
     def add_chunks(
         self,
@@ -114,6 +129,59 @@ class InMemoryVectorStore(VectorStore):
             len(self.chunks),
             path
         )
+        
+    def restore(
+        self,
+        fingerprint: str
+    ) -> bool:
+        """Load the saved index only when its fingerprint is current."""
+        
+        if (
+            self.index_path is None
+            or not self.index_path.exists()
+        ):
+            return False
+        
+        metadata = self.load(
+            self.index_path
+        )
+        
+        if metadata.get("fingerprint") != fingerprint:
+            
+            #The saved data belongs to an older document collection or
+            #configuration, so it must not remain available for searches.
+            self.chunks = []
+            self.vectors = []
+            
+            logger.info(
+                "Persisted RAG index is outdated; rebuilding"
+            )
+            
+            return False
+        
+        return True
+    
+    def rebuild(
+        self,
+        chunks: list[Chunk],
+        fingerprint: str
+    ) -> None:
+        """Replace the current index and persist it when configured."""
+        
+        # Remove any stale in-memory data before creating the new index.
+        self.chunks = []
+        self.vectors = []
+        
+        self.add_chunks(chunks)
+        
+        if self.index_path is not None:
+            self.save(
+                self.index_path,
+                metadata={
+                    "fingerprint": fingerprint
+                }
+            )
+            
         
     def load(
         self,
