@@ -17,6 +17,10 @@ class InMemoryVectorStore:
         embedder: OllamaEmbedder
     ):
         self.embedder = embedder
+
+        # These lists are parallel: chunks[0] describes vectors[0], and so on.
+        # Keeping them aligned is essential for returning the correct source
+        # after a similarity search.
         self.chunks: list[Chunk] = []
         self.vectors: list[np.ndarray] = []
 
@@ -25,10 +29,11 @@ class InMemoryVectorStore:
         chunks: list[Chunk]
     ) -> None:
 
-        if not chunks: 
+        if not chunks:
             logger.info("No chunks were provided")
             return
-        
+
+        # Embedding models receive plain text, not complete Chunk objects.
         texts = [
             chunk.text
             for chunk in chunks
@@ -36,6 +41,7 @@ class InMemoryVectorStore:
 
         embeddings = self.embedder.embed_texts(texts)
 
+        # Store the metadata objects and their embeddings in the same order.
         self.chunks.extend(chunks)
 
         self.vectors.extend(
@@ -61,36 +67,45 @@ class InMemoryVectorStore:
             raise RuntimeError(
                 "The number of chunks and vectors must match"
             )
-            
+
         path = Path(index_path)
-        
+
+        # Create the storage directory automatically when it does not exist.
         path.parent.mkdir(
             parents=True,
             exist_ok=True
         )
-        
+
+        # Dataclass objects cannot be written directly as JSON. asdict()
+        # converts each Chunk into a regular dictionary containing text,
+        # source, page, and chunk_index.
         chunk_data = [
             asdict(chunk)
             for chunk in self.chunks
         ]
-        
+
+        # Convert the list of individual embedding arrays into one matrix.
+        # Each row in this matrix corresponds to one item in chunk_data.
         if self.vectors:
             vectors = np.stack(
                 self.vectors
             )
         else:
             vectors = np.empty(
-                (0,0),
+                (0, 0),
                 dtype=np.float32
             )
-            
+
+        # The NPZ file stores both parts of the index together:
+        # - chunks_json: searchable-text metadata encoded as JSON
+        # - vectors: the numeric embedding matrix used for similarity search
         with path.open("wb") as index_file:
             np.savez_compressed(
                 index_file,
                 chunks_json=json.dumps(chunk_data),
                 vectors=vectors
             )
-            
+
         logger.info(
             "Saved %s chunks to index: %s",
             len(self.chunks),
@@ -102,41 +117,56 @@ class InMemoryVectorStore:
         index_path: str | Path
     ) -> None:
         """Load chunks and vectors from a compressed local index."""
-        
+
         path = Path(index_path)
-        
+
+        # Pickle loading is disabled because pickle data can execute code when
+        # opened. This index needs only standard NumPy arrays and a JSON string,
+        # so allowing pickle would add risk without providing any benefit.
         with np.load(
             path,
             allow_pickle=False
         ) as index:
+
+            # NumPy returns the stored JSON value as a zero-dimensional array.
+            # item() extracts its single value, str() makes it a Python string,
+            # and json.loads() converts that string back into dictionaries.
             chunk_data = json.loads(
                 str(index["chunks_json"].item())
             )
-            
+
+            # Restore the embedding matrix and enforce the same float32 type
+            # used when embeddings are first added to the vector store.
             vectors = np.array(
                 index["vectors"],
                 dtype=np.float32
             )
-            
+
+        # Every saved chunk must still have exactly one saved vector.
         if len(chunk_data) != len(vectors):
             raise ValueError(
                 "The stored chunks and vectors do not match"
             )
-            
+
+        # ** expands a dictionary into named arguments. For example,
+        # Chunk(**data) becomes Chunk(text=..., source=..., page=...,
+        # chunk_index=...), rebuilding the original dataclass object.
         self.chunks = [
             Chunk(**data)
             for data in chunk_data
         ]
-        
+
+        # Iterating through the matrix returns a view of each row. copy()
+        # gives the vector store independent arrays it can safely retain.
         self.vectors = [
             vector.copy()
             for vector in vectors
         ]
-        
+
         logger.info(
             "Loaded %s chunks from index: %s",
             len(self.chunks),
-            path    
+            path
         )
         
     def search(
@@ -148,8 +178,10 @@ class InMemoryVectorStore:
         
         if not self.chunks:
             logger.info("Vector store is empty")
-            return[]
+            return []
 
+        # Convert the user's question into the same vector space as the
+        # document chunks so their semantic similarity can be compared.
         query_vector = np.array(
             self.embedder.embed_text(query),
             dtype=np.float32
@@ -157,6 +189,8 @@ class InMemoryVectorStore:
 
         results = []
 
+        # Compare the question with every stored vector while keeping each
+        # score attached to the correct Chunk metadata.
         for chunk, vector in zip(
             self.chunks,
             self.vectors
@@ -174,11 +208,13 @@ class InMemoryVectorStore:
 
             results.append(result)
 
+        # Highest cosine-similarity scores represent the closest matches.
         results.sort(
             key=lambda result: result.score,
             reverse=True
         )
 
+        # Remove weak matches before limiting the number of returned results.
         if min_score is not None:
             results = [
                 result for result in results if result.score >= min_score
@@ -205,4 +241,3 @@ class InMemoryVectorStore:
         ) / denominator
 
         return float(similarity)
-
