@@ -7,10 +7,11 @@ import numpy as np
 from logger import get_logger
 from rag.embedder import OllamaEmbedder
 from rag.models import Chunk, SearchResult
+from rag.vector_store_base import VectorStore
 
 logger = get_logger(__name__)
 
-class InMemoryVectorStore:
+class InMemoryVectorStore(VectorStore):
 
     def __init__(
         self,
