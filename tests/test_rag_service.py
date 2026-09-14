@@ -1,8 +1,9 @@
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from rag.service import RAGService
 from rag.models import Chunk, Document
+from rag.vector_store_base import VectorStore
 
 class FakeEmbedder:
     
@@ -182,6 +183,42 @@ class RAGServiceTest(unittest.TestCase):
         self.assertIsNone(
             prompt
         )
+        
+    @patch("rag.service.load_documents")
+    def test_initialize_reuses_restored_index(
+        self,
+        mock_load_documents
+    ):
+        vector_store = Mock(
+            spec=VectorStore
+        )
+        
+        vector_store.restore.return_value = True
+        vector_store.size = 9
+        
+        service = RAGService(
+            document_directory="documents",
+            embedder=FakeEmbedder(),
+            vector_store=vector_store
+        )
+        
+        with patch.object(
+            service,
+            "_calculate_index_fingerprint",
+            return_value="test-fingerprint"
+        ): 
+            service.initialize()
+            
+        self.assertTrue(
+            service.initialized
+        )
+        
+        vector_store.restore.assert_called_once_with(
+            "test-fingerprint"
+        )
+        
+        vector_store.rebuild.assert_not_called()
+        mock_load_documents.assert_not_called()
             
 if __name__ == "__main__":
     unittest.main()

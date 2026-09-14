@@ -8,7 +8,7 @@ from rag.embedder import OllamaEmbedder
 from rag.loader import load_documents
 from rag.prompt import build_rag_prompt
 from rag.vector_store import InMemoryVectorStore
-from rag.vector_store import VectorStore
+from rag.vector_store_base import VectorStore
 
 logger = get_logger(__name__)
 
@@ -106,7 +106,7 @@ class RAGService:
         
         # The vector-store implementation decides how its persisted index
         # is restored. RAGService does not need to know whether it uses
-        # as NPZ file, Qdrant, or another storage system.
+        # an NPZ file, Qdrant, or another storage system.
         if self.vector_store.restore(fingerprint):
             self.initialized = True
 
