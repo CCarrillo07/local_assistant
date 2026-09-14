@@ -1,0 +1,40 @@
+[
+    {
+        "question": "What is ORION-27?",
+        "expected_source": "rag_test_notes.txt",
+        "expected_phrase": "internal codename",
+        "forbidden_sources": [
+            "rag_test_document.pdf"
+        ]
+    },
+    {
+        "question": "What is the internal codename for the example RAG knowledge base?",
+        "expected_source": "rag_test_notes.txt",
+        "expected_phrase": "ORION-27",
+        "forbidden_sources": [
+            "rag_test_document.pdf"
+        ]
+    },
+    {
+        "question": "What is Project Aurora?",
+        "expected_source": "rag_test_document.pdf",
+        "expected_phrase": "local AI assistant",
+        "forbidden_sources": [
+            "rag_test_notes.txt"
+        ]
+    },
+    {
+        "question": "Does Project Aurora rely on cloud LLM APIs?",
+        "expected_source": "rag_test_document.pdf",
+        "expected_phrase": "without relying on cloud LLM APIs",
+        "forbidden_sources": [
+            "rag_test_notes.txt"
+        ]
+    },
+    {
+        "question": "How do I bake a chocolate cake?",
+        "expected_source": null,
+        "expected_phrase": null,
+        "forbidden_sources": []
+    }
+]

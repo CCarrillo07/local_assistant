@@ -59,7 +59,9 @@ def main():
     if rag_config.available:
         
         embedder = OllamaEmbedder(
-            model=rag_config.embedding_model
+            model=rag_config.embedding_model,
+            query_prefix=rag_config.embedding_query_prefix,
+            document_prefix=rag_config.embedding_document_prefix
         )
         
         vector_store = create_vector_store(

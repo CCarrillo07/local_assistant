@@ -16,6 +16,8 @@ class RAGConfig:
     qdrant_path: str = "storage/qdrant"
     qdrant_collection: str = "rag_documents"
     embedding_model: str = "nomic-embed-text:latest"
+    embedding_query_prefix: str = "search_query: "
+    embedding_document_prefix: str = "search_document: "
     chunk_size: int = 100
     overlap: int = 20
     top_k: int = 2

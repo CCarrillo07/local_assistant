@@ -49,6 +49,7 @@ class RAGService:
     def _calculate_index_fingerprint(self) -> str:
         """Create an identifier for the documents and RAG configuration."""
         
+      
         document_directory = Path(
             self.document_directory
         )
@@ -60,6 +61,16 @@ class RAGService:
                 self.embedder,
                 "model",
                 self.embedder.__class__.__name__
+            ),
+            "embedding_query_prefix": getattr(
+                    self.embedder,
+                    "query_prefix",
+                    ""
+                ),
+            "embedding_document_prefix": getattr(
+                self.embedder,
+                "document_prefix",
+                ""
             )
         }
         
