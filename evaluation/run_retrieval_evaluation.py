@@ -82,9 +82,9 @@ def main() -> int:
                     None
             )
                 
-            case_passed = (
-                matching_result is not None
-            ) 
+                case_passed = (
+                    matching_result is not None
+                ) 
                
             status = (
                 "PASS" 
