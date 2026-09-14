@@ -26,7 +26,7 @@ class OllamaEmbedder:
             f"{self.query_prefix}{text}"
         )
 
-        return self.embed_texts([text])[0]
+        return self._embed_texts([prepared_text])[0]
 
     def embed_texts(
         self,
