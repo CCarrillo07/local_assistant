@@ -4,6 +4,7 @@ from llm.ollama_provider import OllamaProvider
 from logger import get_logger
 from rag.embedder import OllamaEmbedder
 from rag.service import RAGService
+from rag.vector_store_factory import create_vector_store
 
 logger = get_logger(__name__)
 
@@ -56,13 +57,20 @@ def main():
     rag_enabled = False
 
     if rag_config.available:
+        
+        embedder = OllamaEmbedder(
+            model=rag_config.embedding_model
+        )
+        
+        vector_store = create_vector_store(
+            config=rag_config,
+            embedder=embedder
+        )
 
         rag_service = RAGService(
             document_directory=rag_config.document_directory,
-            index_path=rag_config.index_path,
-            embedder=OllamaEmbedder(
-                model=rag_config.embedding_model
-            ),
+            embedder=embedder,
+            vector_store=vector_store,
             chunk_size=rag_config.chunk_size,
             overlap=rag_config.overlap,
             top_k=rag_config.top_k,
@@ -74,8 +82,7 @@ def main():
         if rag_config.mode in {"auto", "required"}:
 
             print(
-                "\nLoading and embedding "
-                "RAG documents..."
+                "Initializing RAG..."
             )
 
             rag_service.initialize()

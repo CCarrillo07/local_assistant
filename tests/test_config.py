@@ -102,6 +102,28 @@ class RAGConfigTest(unittest.TestCase):
             mode="automatic",
             allow_user_control=False
             )
+            
+    def test_validates_vector_store_backends(self):
+        
+        for backend in ("npz", "qdrant"):
+            
+            with self.subTest(backend=backend):
+                config = RAGConfig(
+                    vector_store_backend=backend
+                )
+                
+                self.assertEqual(
+                    config.vector_store_backend,
+                    backend
+                )
+        
+        with self.assertRaisesRegex(
+            ValueError,
+            "Invalid vector-store backend"
+        ):
+            RAGConfig(
+                vector_store_backend="chroma"
+            )
 
 if __name__ == "__main__":
     unittest.main()

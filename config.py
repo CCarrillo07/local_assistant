@@ -11,7 +11,10 @@ class RAGConfig:
     mode: str = "manual"
     allow_user_control: bool = True
     document_directory: str = "documents"
+    vector_store_backend: str = "qdrant"
     index_path: str = "storage/rag_index.npz"
+    qdrant_path: str = "storage/qdrant"
+    qdrant_collection: str = "rag_documents"
     embedding_model: str = "nomic-embed-text:latest"
     chunk_size: int = 100
     overlap: int = 20
@@ -40,6 +43,20 @@ class RAGConfig:
             raise ValueError(
                 "allow_user_control must be True only "
                 "when RAG is available and mode is manual"
+            )
+        
+        valid_vector_store_backends = {
+            "npz",
+            "qdrant"
+        }
+        
+        if (
+            self.vector_store_backend
+            not in valid_vector_store_backends
+        ):
+            raise ValueError(
+                "Invalid vector-store backend: "
+                f"{self.vector_store_backend}"
             )
 
 @dataclass(frozen=True)

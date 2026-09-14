@@ -29,7 +29,7 @@ class QdrantVectorStore(VectorStore):
             exist_ok=True
         )
         
-        # Local mode persists Qdrant data without required Docker
+        # Local mode persists Qdrant data without requiring Docker
         # or a separately running Qdrant server
         self.client = QdrantClient(
             path=str(storage_path)
@@ -134,7 +134,7 @@ class QdrantVectorStore(VectorStore):
         
         if not embeddings:
             logger.info(
-                "No chunks were provided for the Qdran collection"
+                "No chunks were provided for the Qdrant collection"
             )
             return
                 
