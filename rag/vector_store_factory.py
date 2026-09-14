@@ -2,7 +2,7 @@ from config import RAGConfig
 from logger import get_logger
 from rag.embedder import OllamaEmbedder
 from rag.vector_store import InMemoryVectorStore
-from rag.qdrant_vector_store import VectorStore
+from rag.vector_store_base import VectorStore
 
 logger = get_logger(__name__)
 
@@ -43,3 +43,4 @@ def create_vector_store(
         "Invalid vector-store backend: "
         f"{config.vector_store_backend}"
     )
+    

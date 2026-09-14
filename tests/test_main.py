@@ -28,7 +28,8 @@ class MainRAGModeTest(unittest.TestCase):
             rag=RAGConfig(
                 available=True,
                 mode="required",
-                allow_user_control=False
+                allow_user_control=False,
+                vector_store_backend="npz"
             )
         )
         
@@ -73,7 +74,8 @@ class MainRAGModeTest(unittest.TestCase):
             rag=RAGConfig(
                 available=True,
                 mode="required",
-                allow_user_control=False
+                allow_user_control=False,
+                vector_store_backend="npz"
             )
         )
         
@@ -136,7 +138,8 @@ class MainRAGModeTest(unittest.TestCase):
             rag=RAGConfig(
                 available=True,
                 mode="required",
-                allow_user_control=False
+                allow_user_control=False,
+                vector_store_backend="npz"
             )
         )
         
@@ -190,7 +193,8 @@ class MainRAGModeTest(unittest.TestCase):
             rag=RAGConfig(
                 available=True,
                 mode="auto",
-                allow_user_control=False
+                allow_user_control=False,
+                vector_store_backend="npz"
             )
         )
 
