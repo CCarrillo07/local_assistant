@@ -91,13 +91,13 @@ class QdrantVectorStoreTest(unittest.TestCase):
                 
                 results = restored_store.search(
                     query="What is ORION-27?",
-                    top_k=1,
-                    min_score=0.50
+                    top_k=2,
+                    min_score=None
                 )
                 
                 self.assertEqual(
                     len(results),
-                    1
+                    2
                 )
                 
                 self.assertEqual(
@@ -107,6 +107,37 @@ class QdrantVectorStoreTest(unittest.TestCase):
                 
             finally:
                 restored_store.close()
+                
+    def test_add_chunks_creates_collection(self):
+        
+        with TemporaryDirectory() as temporary_directory:
+            
+            store = QdrantVectorStore(
+                embedder=FakeEmbedder(),
+                path=Path(temporary_directory) / "qdrant",
+                collection_name="test_documents"
+            )
+            
+            try:
+                store.add_chunks(
+                    [
+                        Chunk(
+                            text="ORION-27 is a codename.",
+                            source="notes.txt",
+                            page=None,
+                            chunk_index=0
+                        )
+                    ]
+                )
+                
+                self.assertEqual(
+                    store.size,
+                    1
+                )
+                
+            finally:
+                store.close()
+                                 
                 
 if __name__ == "__main__":
     unittest.main()

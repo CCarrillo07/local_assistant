@@ -55,7 +55,7 @@ class QdrantVectorStore(VectorStore):
     ) -> None:
         """Embed and add chunks without replacing the collection."""
         
-        embeddings = self.embed_chunks(chunks)
+        embeddings = self._embed_chunks(chunks)
         
         if not embeddings:
             return
@@ -124,20 +124,20 @@ class QdrantVectorStore(VectorStore):
         # Generate embeddings before removing the existing collection.
         # If Ollama fails, the previous collection remains available.
         embeddings = self._embed_chunks(chunks)
-        
-        if not embeddings:
-            logger.info(
-                "No chunks were provided for the Qdran collection"
-            )
-            return
-        
+                
         if self.client.collection_exists(
             self.collection_name
         ):
             self.client.delete_collection(
                 collection_name=self.collection_name
             )
-            
+        
+        if not embeddings:
+            logger.info(
+                "No chunks were provided for the Qdran collection"
+            )
+            return
+                
         self._create_collection(
             vector_size=len(embeddings[0])
         )
@@ -195,7 +195,7 @@ class QdrantVectorStore(VectorStore):
                 )
             )
             
-            return results
+        return results
         
     def close(self) -> None:
         """Release the local Qdrant storage files."""
@@ -280,19 +280,19 @@ class QdrantVectorStore(VectorStore):
             points.append(
                 models.PointStruct(
                     id=point_id,
-                    vector=embeddings,
+                    vector=embedding,
                     payload=payload
                 )
             )
             
-            self.client.upsert(
-                collection_name=self.collection_name,
-                points=points,
-                wait=True
-            )
+        self.client.upsert(
+            collection_name=self.collection_name,
+            points=points,
+            wait=True
+        )
             
-            logger.info(
-                "Stored %s chunks in Qdrant collection: %s",
-                len(points),
-                self.collection_name
-            )
+        logger.info(
+            "Stored %s chunks in Qdrant collection: %s",
+            len(points),
+            self.collection_name
+        )
