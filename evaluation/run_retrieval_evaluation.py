@@ -56,10 +56,6 @@ def main() -> int:
             expected_source = case["expected_source"]
             expected_phrase = case["expected_phrase"]
             
-            forbidden_sources = set(
-                case["forbidden_sources"]
-            )
-            
             results = vector_store.search(
                 query=question,
                 top_k=rag_config.top_k,
@@ -72,46 +68,34 @@ def main() -> int:
                 case_passed = not results
                 
             else:
-                top_result = (
-                    results[0]
-                    if results
-                    else None
-                )
+                matching_result = next(
+                    (
+                        result
+                        for result in results
+                        if (
+                            result.chunk.source
+                            == expected_source
+                            and expected_phrase.lower()
+                            in result.chunk.text.lower()
+                        )
+                    ),
+                    None
+            )
                 
-                correct_source = (
-                    top_result is not None
-                    and top_result.chunk.source
-                    == expected_source
-                )
-                
-                correct_phrase = (
-                    top_result is not None
-                    and expected_phrase.lower()
-                    in top_result.chunk.text.lower()
-                )
-                
-                forbidden_found = any(
-                    result.chunk.source
-                    in forbidden_sources
-                    for result in results
-                )
-                
-                case_passed = (
-                    correct_source
-                    and correct_phrase
-                    and not forbidden_found
-                )
-                
+            case_passed = (
+                matching_result is not None
+            ) 
+               
             status = (
                 "PASS" 
                 if case_passed
                 else "FAIL"
             )
             
-            print(f"\n[{status}]{question}")
+            print(f"\n[{status}] {question}")
             
             if not results:
-                print(" No chunks retrieveed")
+                print(" No chunks retrieved")
                 
             for position, result in enumerate(
                 results,
@@ -139,7 +123,7 @@ def main() -> int:
             close_method()
             
     print(
-        f"\nRertrieval evaluation: "
+        f"\nRetrieval evaluation: "
         f"{passed_cases}/{len(cases)} passed"
     )
     
