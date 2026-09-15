@@ -1,27 +1,162 @@
 [
-    {
-        "question": "What is ORION-27?",
-        "expected_source": "rag_test_notes.txt",
-        "expected_phrase": "internal codename"
-    },
-    {
-        "question": "What is the internal codename for the example RAG knowledge base?",
-        "expected_source": "rag_test_notes.txt",
-        "expected_phrase": "ORION-27"
-    },
-    {
-        "question": "What is Project Aurora?",
-        "expected_source": "rag_test_document.pdf",
-        "expected_phrase": "local AI assistant"
-    },
-    {
-        "question": "Does Project Aurora rely on cloud LLM APIs?",
-        "expected_source": "rag_test_document.pdf",
-        "expected_phrase": "without relying on cloud LLM APIs"
-    },
-    {
-        "question": "How do I bake a chocolate cake?",
-        "expected_source": null,
-        "expected_phrase": null
-    }
+  {
+    "question": "What is ORION-27?",
+    "expected_source": "rag_test_notes.txt",
+    "expected_phrase": "internal codename"
+  },
+  {
+    "question": "What is the internal codename for the example RAG knowledge base?",
+    "expected_source": "rag_test_notes.txt",
+    "expected_phrase": "ORION-27"
+  },
+  {
+    "question": "Which model profile is intended for lightweight development and debugging?",
+    "expected_source": "rag_test_notes.txt",
+    "expected_phrase": "fast profile"
+  },
+  {
+    "question": "What is Project Aurora?",
+    "expected_source": "rag_test_document.pdf",
+    "expected_phrase": "local AI assistant"
+  },
+  {
+    "question": "Does Project Aurora rely on cloud LLM APIs?",
+    "expected_source": "rag_test_document.pdf",
+    "expected_phrase": "without relying on cloud LLM APIs"
+  },
+  {
+    "question": "Which model is used for the current development version of Project Aurora?",
+    "expected_source": "rag_test_document.pdf",
+    "expected_phrase": "Qwen3.5 2B"
+  },
+  {
+    "question": "What is the internal name of the Project Aurora security baseline?",
+    "expected_source": "aurora_security_policy.txt",
+    "expected_phrase": "SENTINEL-14"
+  },
+  {
+    "question": "Is outbound network access enabled automatically for Aurora installations?",
+    "expected_source": "aurora_security_policy.txt",
+    "expected_phrase": "disabled by default"
+  },
+  {
+    "question": "How long are Project Aurora audit logs retained?",
+    "expected_source": "aurora_security_policy.txt",
+    "expected_phrase": "30 calendar days"
+  },
+  {
+    "question": "What is the codename of the standard Aurora deployment bundle?",
+    "expected_source": "aurora_deployment_guide.pdf",
+    "expected_phrase": "HARBOR-6"
+  },
+  {
+    "question": "How much memory is required for a standard Aurora deployment?",
+    "expected_source": "aurora_deployment_guide.pdf",
+    "expected_phrase": "16 GB of system memory"
+  },
+  {
+    "question": "Which vector-store backend is recommended for production Aurora installations?",
+    "expected_source": "aurora_deployment_guide.pdf",
+    "expected_phrase": "local Qdrant backend"
+  },
+  {
+    "question": "How many paid leave days do eligible Meridian Labs employees receive?",
+    "expected_source": "meridian_leave_policy.txt",
+    "expected_phrase": "18 paid leave days"
+  },
+  {
+    "question": "How many unused leave days may Meridian employees carry into the next year?",
+    "expected_source": "meridian_leave_policy.txt",
+    "expected_phrase": "up to five unused days"
+  },
+  {
+    "question": "How far in advance should planned leave normally be requested?",
+    "expected_source": "meridian_leave_policy.txt",
+    "expected_phrase": "five business days"
+  },
+  {
+    "question": "What is the nightly lodging limit in the Northstar travel policy?",
+    "expected_source": "northstar_travel_policy.pdf",
+    "expected_phrase": "USD 180 per night"
+  },
+  {
+    "question": "What is Northstar's daily meal allowance?",
+    "expected_source": "northstar_travel_policy.pdf",
+    "expected_phrase": "USD 65 per day"
+  },
+  {
+    "question": "For which expenses does Northstar require an itemized receipt?",
+    "expected_source": "northstar_travel_policy.pdf",
+    "expected_phrase": "USD 25 or more"
+  },
+  {
+    "question": "What is the maximum forklift speed inside the Atlas warehouse?",
+    "expected_source": "atlas_warehouse_safety_manual.txt",
+    "expected_phrase": "8 kilometers per hour"
+  },
+  {
+    "question": "Where should Atlas employees assemble during an evacuation?",
+    "expected_source": "atlas_warehouse_safety_manual.txt",
+    "expected_phrase": "Gate C assembly area"
+  },
+  {
+    "question": "How quickly must a warehouse incident be reported?",
+    "expected_source": "atlas_warehouse_safety_manual.txt",
+    "expected_phrase": "within 30 minutes"
+  },
+  {
+    "question": "When does the Cedar Grove irrigation cycle begin?",
+    "expected_source": "cedar_grove_greenhouse_guide.txt",
+    "expected_phrase": "5:30 a.m."
+  },
+  {
+    "question": "What humidity range should Cedar Grove maintain?",
+    "expected_source": "cedar_grove_greenhouse_guide.txt",
+    "expected_phrase": "between 60% and 70%"
+  },
+  {
+    "question": "What identifier is assigned to the primary nutrient tank?",
+    "expected_source": "cedar_grove_greenhouse_guide.txt",
+    "expected_phrase": "GREEN-4"
+  },
+  {
+    "question": "How do I bake a chocolate cake?",
+    "expected_source": null,
+    "expected_phrase": null
+  },
+  {
+    "question": "What is the capital of Japan?",
+    "expected_source": null,
+    "expected_phrase": null
+  },
+  {
+    "question": "How can I repair a broken bicycle chain?",
+    "expected_source": null,
+    "expected_phrase": null
+  },
+  {
+    "question": "Who wrote Pride and Prejudice?",
+    "expected_source": null,
+    "expected_phrase": null
+  },
+  {
+    "question": "What are the symptoms of vitamin D deficiency?",
+    "expected_source": null,
+    "expected_phrase": null
+  },
+  {
+    "question": "What will the weather be tomorrow in Merida?",
+    "expected_source": null,
+    "expected_phrase": null
+  },
+  {
+    "question": "When is Project Nebula scheduled to launch?",
+    "expected_source": null,
+    "expected_phrase": null
+  },
+  {
+    "question": "How do I calculate the monthly payment on a home mortgage?",
+    "expected_source": null,
+    "expected_phrase": null
+  }
 ]

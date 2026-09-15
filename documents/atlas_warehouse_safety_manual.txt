@@ -1,0 +1,19 @@
+Atlas Distribution Center Safety Manual
+
+Traffic Rules
+The maximum forklift speed inside the warehouse is 8 kilometers per hour. Forklifts must yield to pedestrians at every marked crossing. Operators must sound the horn before entering a blind intersection.
+
+Zone Markings
+Blue floor markings identify pedestrian walkways. Yellow markings identify equipment lanes. Red markings indicate areas that must remain clear for emergency access and fire equipment.
+
+Personal Protective Equipment
+Safety shoes and high-visibility vests are required on the warehouse floor. Eye protection is also required in the battery-charging and maintenance areas. Visitors must remain with an authorized escort.
+
+Incident Reporting
+Injuries, collisions, spills, and damaged storage racks must be reported to the shift supervisor within 30 minutes. The affected area must be isolated until a trained employee confirms that operations can resume.
+
+Emergency Evacuation
+When the evacuation alarm sounds, employees must stop equipment safely and leave through the nearest marked exit. The primary evacuation point is the Gate C assembly area. Supervisors perform a head count and report missing personnel to the emergency coordinator.
+
+Daily Inspection
+Forklift operators complete a documented inspection before the first use of each shift. A vehicle with a failed brake, steering, warning-light, or horn check must be removed from service.

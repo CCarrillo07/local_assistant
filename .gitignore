@@ -48,6 +48,14 @@ Thumbs.db
 
 # Local RAG documents / private data
 documents/*
+
+# Approved synthetic evaluation documents
 !documents/.gitkeep
 !documents/rag_test_document.pdf
 !documents/rag_test_notes.txt
+!documents/aurora_security_policy.txt
+!documents/aurora_deployment_guide.pdf
+!documents/meridian_leave_policy.txt
+!documents/northstar_travel_policy.pdf
+!documents/atlas_warehouse_safety_manual.txt
+!documents/cedar_grove_greenhouse_guide.txt

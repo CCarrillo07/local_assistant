@@ -1,0 +1,19 @@
+Project Aurora Security Policy
+
+Purpose
+This policy defines the minimum security controls for Project Aurora installations. The internal name for the security baseline is SENTINEL-14. The baseline applies to development laptops, demonstration systems, and client deployments.
+
+Network Access
+Outbound network access is disabled by default. A deployment administrator must explicitly approve and configure any connector that communicates with an external service. Local Ollama inference and local Qdrant storage do not require internet access.
+
+Storage Protection
+Client documents, generated indexes, and application logs must remain inside the approved local storage directory. Production installations must use operating-system disk encryption. Backup copies must be encrypted and stored separately from the active machine.
+
+Audit Logging
+Security and administrative events are written to the application audit log. Audit logs are retained for 30 calendar days. The logs record configuration changes, index rebuilds, model changes, and failed attempts to use unavailable controls. The logs must not contain complete document text or authentication secrets.
+
+External Connectors
+External connectors are disabled until an administrator authorizes them. Each connector must have a documented purpose, limited credentials, and a clear method for revoking access. Enabling one connector does not authorize any other connector.
+
+Incident Handling
+If an installation is suspected of exposing client information, the operator must disconnect external network access, preserve the audit logs, and notify the deployment administrator. The operator should not delete the local index until the incident review is complete.

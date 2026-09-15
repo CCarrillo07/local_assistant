@@ -1,0 +1,19 @@
+Cedar Grove Greenhouse Maintenance Guide
+
+Daily Irrigation
+The automated irrigation cycle begins at 5:30 a.m. each day. Staff must inspect the main lines before the cycle starts and record any visible leak in the maintenance log.
+
+Climate Targets
+During normal production, relative humidity should remain between 60% and 70%. Ventilation fans start automatically when humidity exceeds the upper limit for ten continuous minutes. Staff should not override the fans unless a supervisor authorizes it.
+
+Sensor Calibration
+Temperature and humidity sensors are calibrated every Monday morning. The reference instrument is stored in the locked cabinet beside the control room. A sensor that differs from the reference by more than two percentage points must be replaced or recalibrated.
+
+Nutrient System
+The primary nutrient tank is identified as GREEN-4. Its level is checked before every irrigation cycle. Concentrate must never be poured directly into an active irrigation line.
+
+Plant Intake
+New plants remain in the intake area for a 48-hour observation period before joining the production rows. Staff inspect the leaves, soil, and containers for signs of pests during this period.
+
+Emergency Shutdown
+The red switch beside the control panel stops pumps, heaters, and ventilation equipment. After an emergency shutdown, only the maintenance supervisor may restart the automated system.
