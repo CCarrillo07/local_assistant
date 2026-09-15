@@ -22,7 +22,7 @@ def load_cases() -> list[dict]:
 def normalize_text(text: str) -> str:
     """Normalize whitespace and capitalization for text comparisons."""
     
-    return "".join(text.lower().split())
+    return " ".join(text.lower().split())
     
 def main() -> int:
     """Run the retrieval evaluation without calling the LLM."""
