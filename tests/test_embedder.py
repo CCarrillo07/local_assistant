@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 from rag.embedder import OllamaEmbedder
 
-class OllamaEmbeddertest(unittest.TestCase):
+class OllamaEmbedderTest(unittest.TestCase):
     
     @patch("rag.embedder.ollama.embed")
     def test_uses_query_and_document_prefixes(

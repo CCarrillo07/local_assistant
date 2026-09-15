@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 
 from logger import get_logger
-from rag.chunker import chunk_documents
+from rag.chunker import CHUNKING_STRATEGY, chunk_documents
 from rag.embedder import OllamaEmbedder
 from rag.loader import load_documents
 from rag.prompt import build_rag_prompt
@@ -55,6 +55,7 @@ class RAGService:
         )
         
         fingerprint_data = {
+            "chunking_strategy": CHUNKING_STRATEGY,
             "chunk_size": self.chunk_size,
             "overlap": self.overlap,
             "embedding_model": getattr(
