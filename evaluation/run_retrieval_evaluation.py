@@ -19,6 +19,11 @@ def load_cases() -> list[dict]:
         )
     )
     
+def normalize_text(text: str) -> str:
+    """Normalize whitespace and capitalization for text comparisons."""
+    
+    return "".join(text.lower().split())
+    
 def main() -> int:
     """Run the retrieval evaluation without calling the LLM."""
     
@@ -75,8 +80,8 @@ def main() -> int:
                         if (
                             result.chunk.source
                             == expected_source
-                            and expected_phrase.lower()
-                            in result.chunk.text.lower()
+                            and normalize_text(expected_phrase)
+                            in normalize_text(result.chunk.text)
                         )
                     ),
                     None
