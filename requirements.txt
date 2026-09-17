@@ -3,3 +3,4 @@ pymupdf
 numpy
 qdrant-client
 langchain-text-splitters==1.1.2
+flashrank==0.2.10
