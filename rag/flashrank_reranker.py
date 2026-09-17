@@ -12,7 +12,7 @@ class FlashRankReranker(Reranker):
         self,
         model_name: str = "ms-marco-MiniLM-L-12-v2",
         cache_dir: str = "storage/flashrank",
-        max_lenght: int = 128,
+        max_length: int = 128,
         min_score: float | None = None,
         ranker: Any | None = None
     ):
@@ -26,7 +26,7 @@ class FlashRankReranker(Reranker):
             else Ranker(
                 model_name=model_name,
                 cache_dir=cache_dir,
-                max_length=max_lenght
+                max_length=max_length
             )
         )
 
@@ -81,7 +81,7 @@ class FlashRankReranker(Reranker):
 
             reranked_results.append(
                 SearchResult(
-                    chunk=original_index.chunk,
+                    chunk=original_result.chunk,
                     score=score
                 )
             )
