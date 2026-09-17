@@ -225,6 +225,73 @@ class MainRAGModeTest(unittest.TestCase):
             user_message="How do I bake a chocolate cake?",
             model_message=None
         )
+
+    @patch(
+        "builtins.input",
+        side_effect=["/exit"]
+    )
+    @patch("main.RAGService")
+    @patch("main.create_reranker")
+    @patch("main.create_vector_store")
+    @patch("main.OllamaEmbedder")
+    @patch("main.Assistant")
+    @patch("main.OllamaProvider")
+    def test_wires_configured_reranker_into_rag_service(
+        self,
+        mock_provider_class,
+        mock_assistant_class,
+        mock_embedder_class,
+        mock_vector_store_factory,
+        mock_reranker_factory,
+        mock_rag_service_class,
+        mock_input
+    ):
+        test_config = AppConfig(
+            default_model="test-model",
+            rag=RAGConfig(
+                available=True,
+                mode="manual",
+                allow_user_control=True,
+                vector_store_backend="npz",
+                reranker_enabled=True,
+                candidate_k=5
+            )
+        )
+
+        mock_embedder = (
+            mock_embedder_class.return_value
+        )
+        mock_vector_store = (
+            mock_vector_store_factory.return_value
+        )
+        mock_reranker = (
+            mock_reranker_factory.return_value
+        )
+
+        with patch.object(
+            main,
+            "CONFIG",
+            test_config
+        ):
+            main.main()
+
+        mock_reranker_factory.assert_called_once_with(
+            config=test_config.rag
+        )
+
+        mock_rag_service_class.assert_called_once_with(
+            document_directory=(
+                test_config.rag.document_directory
+            ),
+            embedder=mock_embedder,
+            vector_store=mock_vector_store,
+            chunk_size=test_config.rag.chunk_size,
+            overlap=test_config.rag.overlap,
+            top_k=test_config.rag.top_k,
+            min_score=test_config.rag.min_score,
+            reranker=mock_reranker,
+            candidate_k=test_config.rag.candidate_k
+        )
     
         
 if __name__ == "__main__":
