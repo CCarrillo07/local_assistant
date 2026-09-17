@@ -118,6 +118,28 @@ class AnswerGroundingEvaluationTest(unittest.TestCase):
             )
         )
 
+    def test_fails_when_answer_contains_a_generic_source_label(self):
+        evaluation = evaluate_answer(
+            answer=(
+                "A standard deployment requires 16 GB. "
+                "Source: Project Aurora Deployment Guide."
+            ),
+            expected_phrases=[
+                "16 GB"
+            ]
+        )
+
+        self.assertFalse(
+            evaluation.passed
+        )
+        self.assertTrue(
+            any(
+                "source reference"
+                in failure.lower()
+                for failure in evaluation.failures
+            )
+        )
+
     def test_requires_exact_abstention_for_unsupported_questions(self):
         passing_evaluation = evaluate_answer(
             answer=ABSTENTION_MESSAGE,
