@@ -1,5 +1,5 @@
 from assistant import Assistant
-from evaluation.answer_grounding import(
+from evaluation.answer_grounding import (
     ABSTENTION_MESSAGE,
     AnswerEvaluation,
     evaluate_answer
@@ -11,7 +11,7 @@ def generate_answer(
     rag_service: RAGService,
     assistant: Assistant
 ) -> str:
-    """Generate one grounder answer for evaluation."""
+    """Generate one grounded answer for evaluation."""
 
     rag_context = rag_service.build_context(
         question
@@ -47,6 +47,10 @@ def evaluate_case(
         answer=answer,
         expected_phrases=case.get(
             "expected_phrases",
+            []
+        ),
+        forbidden_phrases=case.get(
+            "forbidden_phrases",
             []
         ),
         expect_abstention=case.get(

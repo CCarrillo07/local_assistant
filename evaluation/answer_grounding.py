@@ -34,6 +34,7 @@ def normalize_text(
 def evaluate_answer(
     answer: str,
     expected_phrases: list[str],
+    forbidden_phrases: list[str] | None = None,
     expect_abstention: bool = False
 ) -> AnswerEvaluation:
     """Evaluate facts, abstention, and source-reference rules."""
@@ -70,6 +71,19 @@ def evaluate_answer(
                 f"{expected_phrase}"
             )
 
+    for forbidden_phrase in (
+        forbidden_phrases or []
+    ):
+        normalized_phrase = normalize_text(
+            forbidden_phrase
+        )
+
+        if normalized_phrase in normalized_answer:
+            failures.append(
+                "Answer contains forbidden phrase: "
+                f"{forbidden_phrase}"
+            )
+    
     for pattern in FORBIDDEN_SOURCE_PATTERNS:
 
         if pattern in normalized_answer:
