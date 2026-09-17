@@ -22,6 +22,13 @@ class RAGConfig:
     overlap: int = 20
     top_k: int = 2
     min_score: float = 0.42
+    candidate_k: int = 5
+    reranker_enabled: bool = False
+    reranker_backend: str = "flashrank"
+    reranker_model: str = "ms-marco-MiniLM-L-12-v2"
+    reranker_cache_dir: str = "storage/flashrank"
+    reranker_max_length: int = 128
+    reranker_min_score: float | None = None
 
     def __post_init__(self) -> None:
 
@@ -60,6 +67,40 @@ class RAGConfig:
                 "Invalid vector-store backend: "
                 f"{self.vector_store_backend}"
             )
+
+        if self.candidate_k < self.top_k:
+            raise ValueError(
+                "candidate_k must be greater than "
+                "or equal to top_k"
+            )
+
+        valid_reranker_backends = {
+            "flashrank"
+        }
+
+        if (
+            self.reranker_backend
+            not in valid_reranker_backends
+        ):
+            raise ValueError(
+                "Invalid reranker backend: "
+                f"{self.reranker_backend}"
+            )
+
+        if self.reranker_max_length <= 0:
+            raise ValueError(
+                "reranker_max_length must be positive"
+            )
+
+        if (
+            self.reranker_min_score is not None
+            and not 0.0 <= self.reranker_min_score <= 1.0
+        ):
+            raise ValueError(
+                "reranker_min_score must be between "
+                "0.0 and 1.0"
+            )
+
 
 @dataclass(frozen=True)
 class AppConfig:
