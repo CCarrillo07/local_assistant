@@ -106,5 +106,37 @@ class RAGPromptTests(unittest.TestCase):
             prompt
         )
         
+
+    def test_tells_model_not_to_generate_citations(self):
+
+        results = [
+            SearchResult(
+                chunk=Chunk(
+                    text="A grounded fact.",
+                    source="verified_source.txt",
+                    page=None,
+                    chunk_index=0
+                ),
+                score=0.95
+            )
+        ]
+
+        prompt = build_rag_prompt(
+            question="What is the fact?",
+            results=results
+        )
+
+        self.assertIn(
+            "Do not include citations, filenames, "
+            "page numbers, or source labels",
+            prompt
+        )
+
+        self.assertIn(
+            "The application will display "
+            "verified sources separately.",
+            prompt
+        )
+
 if __name__ == "__main__":
     unittest.main()
