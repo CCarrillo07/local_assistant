@@ -115,6 +115,70 @@ class RAGServiceTest(unittest.TestCase):
             results=reranked_results
         )
     
+
+    @patch("rag.service.build_rag_prompt")
+    def test_build_context_returns_prompt_and_retrieved_results(
+        self,
+        mock_build_rag_prompt
+    ):
+        """Keep the prompt and its supporting results together."""
+
+        question = "What is ORION-27?"
+        retrieved_results = [
+            SearchResult(
+                chunk=Chunk(
+                    text=(
+                        "ORION-27 is the internal codename "
+                        "for the example RAG knowledge base."
+                    ),
+                    source="rag_test_notes.txt",
+                    page=None,
+                    chunk_index=1
+                ),
+                score=0.98
+            )
+        ]
+
+        vector_store = Mock(
+            spec=VectorStore
+        )
+        vector_store.search.return_value = (
+            retrieved_results
+        )
+        mock_build_rag_prompt.return_value = (
+            "Grounded RAG prompt"
+        )
+
+        service = RAGService(
+            document_directory="documents",
+            embedder=FakeEmbedder(),
+            vector_store=vector_store,
+            top_k=1,
+            min_score=0.42
+        )
+        service.initialized = True
+
+        context = service.build_context(
+            question
+        )
+
+        self.assertIsNotNone(
+            context
+        )
+        self.assertEqual(
+            context.prompt,
+            "Grounded RAG prompt"
+        )
+        self.assertEqual(
+            context.results,
+            retrieved_results
+        )
+
+        mock_build_rag_prompt.assert_called_once_with(
+            question=question,
+            results=retrieved_results
+        )
+
     def test_requires_initialization_before_building_prompt(self):
         
         service = RAGService(

@@ -1,4 +1,5 @@
 import unittest
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import main
@@ -29,7 +30,8 @@ class MainRAGModeTest(unittest.TestCase):
                 available=True,
                 mode="required",
                 allow_user_control=False,
-                vector_store_backend="npz"
+                vector_store_backend="npz",
+                reranker_enabled=False
             )
         )
         
@@ -75,15 +77,19 @@ class MainRAGModeTest(unittest.TestCase):
                 available=True,
                 mode="required",
                 allow_user_control=False,
-                vector_store_backend="npz"
+                vector_store_backend="npz",
+                reranker_enabled=False
             )
         )
         
         mock_rag_service = (
             mock_rag_service_class.return_value
         )
-        mock_rag_service.build_prompt.return_value = (
-            "Augmented RAG prompt"
+        mock_rag_service.build_context.return_value = (
+            SimpleNamespace(
+                prompt="Augmented RAG prompt",
+                results=[]
+            )
         )
         
         mock_assistant = mock_assistant_class.return_value
@@ -103,7 +109,7 @@ class MainRAGModeTest(unittest.TestCase):
             "in this deployment."
         )
         
-        mock_rag_service.build_prompt.assert_called_once_with(
+        mock_rag_service.build_context.assert_called_once_with(
             "What is ORION-27?"
         )
         
@@ -139,7 +145,8 @@ class MainRAGModeTest(unittest.TestCase):
                 available=True,
                 mode="required",
                 allow_user_control=False,
-                vector_store_backend="npz"
+                vector_store_backend="npz",
+                reranker_enabled=False
             )
         )
         
@@ -147,7 +154,7 @@ class MainRAGModeTest(unittest.TestCase):
             mock_rag_service_class.return_value
         )
         
-        mock_rag_service.build_prompt.return_value = None
+        mock_rag_service.build_context.return_value = None
 
         mock_assistant = mock_assistant_class.return_value
         
@@ -158,7 +165,7 @@ class MainRAGModeTest(unittest.TestCase):
         ):
             main.main()
             
-        mock_rag_service.build_prompt.assert_called_once_with(
+        mock_rag_service.build_context.assert_called_once_with(
             "How do I bake a chocolate cake?"
         )
         
@@ -194,14 +201,15 @@ class MainRAGModeTest(unittest.TestCase):
                 available=True,
                 mode="auto",
                 allow_user_control=False,
-                vector_store_backend="npz"
+                vector_store_backend="npz",
+                reranker_enabled=False
             )
         )
 
         mock_rag_service = (
             mock_rag_service_class.return_value
         )
-        mock_rag_service.build_prompt.return_value = None
+        mock_rag_service.build_context.return_value = None
 
         mock_assistant = mock_assistant_class.return_value
         mock_assistant.send_message.return_value = iter(
@@ -217,7 +225,7 @@ class MainRAGModeTest(unittest.TestCase):
 
         mock_rag_service.initialize.assert_called_once_with()
 
-        mock_rag_service.build_prompt.assert_called_once_with(
+        mock_rag_service.build_context.assert_called_once_with(
             "How do I bake a chocolate cake?"
         )
 
@@ -294,5 +302,97 @@ class MainRAGModeTest(unittest.TestCase):
         )
     
         
+
+    @patch(
+        "builtins.input",
+        side_effect=[
+            "What is ORION-27?",
+            "/exit"
+        ]
+    )
+    @patch("builtins.print")
+    @patch("main.format_sources")
+    @patch("main.RAGService")
+    @patch("main.create_reranker")
+    @patch("main.create_vector_store")
+    @patch("main.OllamaEmbedder")
+    @patch("main.Assistant")
+    @patch("main.OllamaProvider")
+    def test_prints_deterministic_sources_after_grounded_answer(
+        self,
+        mock_provider_class,
+        mock_assistant_class,
+        mock_embedder_class,
+        mock_vector_store_factory,
+        mock_reranker_factory,
+        mock_rag_service_class,
+        mock_format_sources,
+        mock_print,
+        mock_input
+    ):
+        """Print application-generated sources after a grounded answer."""
+
+        test_config = AppConfig(
+            default_model="test-model",
+            rag=RAGConfig(
+                available=True,
+                mode="required",
+                allow_user_control=False,
+                vector_store_backend="npz",
+                reranker_enabled=False
+            )
+        )
+
+        retrieved_results = [
+            object()
+        ]
+
+        mock_rag_service = (
+            mock_rag_service_class.return_value
+        )
+        mock_rag_service.build_context.return_value = (
+            SimpleNamespace(
+                prompt="Augmented RAG prompt",
+                results=retrieved_results
+            )
+        )
+
+        mock_assistant = (
+            mock_assistant_class.return_value
+        )
+        mock_assistant.send_message.return_value = iter(
+            ["Grounded answer"]
+        )
+
+        mock_format_sources.return_value = (
+            "Sources:\n"
+            "- rag_test_notes.txt"
+        )
+
+        with patch.object(
+            main,
+            "CONFIG",
+            test_config
+        ):
+            main.main()
+
+        mock_rag_service.build_context.assert_called_once_with(
+            "What is ORION-27?"
+        )
+
+        mock_assistant.send_message.assert_called_once_with(
+            user_message="What is ORION-27?",
+            model_message="Augmented RAG prompt"
+        )
+
+        mock_format_sources.assert_called_once_with(
+            retrieved_results
+        )
+
+        mock_print.assert_any_call(
+            "Sources:\n"
+            "- rag_test_notes.txt"
+        )
+
 if __name__ == "__main__":
     unittest.main()
