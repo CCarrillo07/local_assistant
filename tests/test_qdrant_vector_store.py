@@ -137,6 +137,97 @@ class QdrantVectorStoreTest(unittest.TestCase):
                 
             finally:
                 store.close()
+
+    def test_rebuild_replaces_existing_collection(self):
+        old_chunks = [
+            Chunk(
+                text="ORION-27 is the internal codename.",
+                source="old_notes.txt",
+                page=None,
+                chunk_index=0
+            ),
+            Chunk(
+                text="The assistant can run locally.",
+                source="old_overview.txt",
+                page=None,
+                chunk_index=0
+            )
+        ]
+
+        replacement_chunk = Chunk(
+            text="This is the replacement document.",
+            source="replacement.txt",
+            page=None,
+            chunk_index=0
+        )
+
+        with TemporaryDirectory() as temporary_directory:
+            store = QdrantVectorStore(
+                embedder=FakeEmbedder(),
+                path=(
+                    Path(temporary_directory)
+                    / "qdrant"
+                ),
+                collection_name="test_documents"
+            )
+
+            try:
+                store.rebuild(
+                    chunks=old_chunks,
+                    fingerprint="old-fingerprint"
+                )
+
+                self.assertEqual(
+                    store.size,
+                    2
+                )
+
+                store.rebuild(
+                    chunks=[replacement_chunk],
+                    fingerprint="new-fingerprint"
+                )
+
+                self.assertEqual(
+                    store.size,
+                    1
+                )
+
+                self.assertTrue(
+                    store.restore(
+                        "new-fingerprint"
+                    )
+                )
+
+                results = store.search(
+                    query="replacement document",
+                    top_k=10,
+                    min_score=None
+                )
+
+                self.assertEqual(
+                    len(results),
+                    1
+                )
+
+                self.assertEqual(
+                    results[0].chunk.source,
+                    "replacement.txt"
+                )
+
+                old_sources = {
+                    "old_notes.txt",
+                    "old_overview.txt"
+                }
+
+                self.assertTrue(
+                    all(
+                        result.chunk.source not in old_sources
+                        for result in results
+                    )
+                )
+
+            finally:
+                store.close()
                                  
                 
 if __name__ == "__main__":
