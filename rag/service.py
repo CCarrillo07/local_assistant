@@ -9,6 +9,7 @@ from rag.loader import load_documents
 from rag.prompt import build_rag_prompt
 from rag.vector_store import InMemoryVectorStore
 from rag.vector_store_base import VectorStore
+from rag.reranker_base import Reranker
 
 logger = get_logger(__name__)
 
@@ -23,7 +24,9 @@ class RAGService:
         chunk_size: int = 100,
         overlap: int = 20,
         top_k: int = 2,
-        min_score: float = 0.42
+        min_score: float = 0.42,
+        reranker: Reranker | None = None,
+        candidate_k: int | None = None
     ):
         
         self.document_directory = document_directory
@@ -44,6 +47,20 @@ class RAGService:
         self.top_k = top_k
         self.min_score = min_score
                 
+        self.reranker = reranker
+
+        self.candidate_k = (
+            candidate_k
+            if candidate_k is not None
+            else top_k
+        )
+
+        if self.candidate_k < self.top_k:
+            raise ValueError(
+                "candidate_k must be greater than "
+                "or equal to top_k"
+            )
+
         self.initialized = False
 
     def _calculate_index_fingerprint(self) -> str:
@@ -163,15 +180,34 @@ class RAGService:
                 "before processing questions"
             )
             
+        retrieval_k = (
+            self.candidate_k
+            if self.reranker is not None
+            else self.top_k
+        )
+
         results = self.vector_store.search(
             query=question,
-            top_k=self.top_k,
+            top_k=retrieval_k,
             min_score=self.min_score
         )
-        
+
         if not results:
             return None
-        
+
+        if self.reranker is not None:
+
+            results = self.reranker.rerank(
+                question=question,
+                results=results,
+                top_k=self.top_k
+            )
+
+            # The reranker may reject every candidate when none
+            # is sufficiently relevant to the question
+            if not results:
+                return None
+
         return build_rag_prompt(
             question=question,
             results=results
