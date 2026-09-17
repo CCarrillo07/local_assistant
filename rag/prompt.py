@@ -22,18 +22,9 @@ def build_rag_prompt(
         start=1
     ):
 
-        chunk = result.chunk
-
-        source_location = chunk.source
-
-        if chunk.page is not None:
-            source_location += f", page {chunk.page}"
-
         context_section = (
-            f"[Source {position}: "
-            f"{source_location}, "
-            f"chunk {chunk.chunk_index}]\n"
-            f"{chunk.text}"
+            f"[Context passage {position}]\n"
+            f"{result.chunk.text}"
         )
 
         context_sections.append(

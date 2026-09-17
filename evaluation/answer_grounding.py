@@ -10,6 +10,7 @@ FORBIDDEN_SOURCE_PATTERNS = (
     "https://",
     "www.",
     "[source",
+    "source:",
     "source 1: ",
     ".txt",
     ".pdf"
@@ -25,10 +26,22 @@ class AnswerEvaluation:
 def normalize_text(
     text: str
 ) -> str: 
-    """Normalize capitalization and whitespace."""
+    """Normalize formatting, capitalization and whitespace."""
+
+    normalized_text = text.lower()
+
+    for markdown_character in (
+        "*",
+        "_",
+        "`"
+    ):
+        normalized_text = normalized_text.replace(
+            markdown_character,
+            ""
+        )
 
     return " ".join(
-        text.lower().split()
+        normalized_text.split()
     )
 
 def evaluate_answer(

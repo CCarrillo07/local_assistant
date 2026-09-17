@@ -1,0 +1,93 @@
+[
+  {
+    "question": "What is ORION-27?",
+    "expected_phrases": [
+      "ORION-27",
+      "internal codename"
+    ],
+    "forbidden_phrases": [
+      "Project Aurora",
+      "Qwen3.5"
+    ],
+    "expect_abstention": false
+  },
+  {
+    "question": "What is Project Aurora?",
+    "expected_phrases": [
+      "local AI assistant",
+      "personal computer"
+    ],
+    "forbidden_phrases": [
+      "ORION-27"
+    ],
+    "expect_abstention": false
+  },
+  {
+    "question": "What is the internal name of the Project Aurora security baseline?",
+    "expected_phrases": [
+      "SENTINEL-14"
+    ],
+    "forbidden_phrases": [
+      "HARBOR-6"
+    ],
+    "expect_abstention": false
+  },
+  {
+    "question": "What is the codename of the standard Aurora deployment bundle?",
+    "expected_phrases": [
+      "HARBOR-6"
+    ],
+    "forbidden_phrases": [
+      "SENTINEL-14"
+    ],
+    "expect_abstention": false
+  },
+  {
+    "question": "How much memory is required for a standard Aurora deployment?",
+    "expected_phrases": [
+      "16 GB"
+    ],
+    "forbidden_phrases": [
+      "8 GB"
+    ],
+    "expect_abstention": false
+  },
+  {
+    "question": "How many paid leave days do eligible Meridian Labs employees receive?",
+    "expected_phrases": [
+      "18 paid leave days"
+    ],
+    "forbidden_phrases": [
+      "five paid leave days"
+    ],
+    "expect_abstention": false
+  },
+  {
+    "question": "What is the nightly lodging limit in the Northstar travel policy?",
+    "expected_phrases": [
+      "180"
+    ],
+    "forbidden_phrases": [],
+    "expect_abstention": false
+  },
+  {
+    "question": "What is the maximum forklift speed inside the Atlas warehouse?",
+    "expected_phrases": [
+      "8 kilometers per hour"
+    ],
+    "forbidden_phrases": [],
+    "expect_abstention": false
+  },
+  {
+    "question": "How do I bake a chocolate cake?",
+    "expected_phrases": [],
+    "forbidden_phrases": [],
+    "expect_abstention": true
+  },
+  {
+    "question": "When is Project Nebula scheduled to launch?",
+    "expected_phrases": [],
+    "forbidden_phrases": [],
+    "expect_abstention": true
+  }
+]
