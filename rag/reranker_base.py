@@ -8,7 +8,7 @@ class Reranker(ABC):
     @abstractmethod
     def rerank(
         self,
-        question,
+        question: str,
         results: list[SearchResult],
         top_k: int
     ) -> list[SearchResult]:
