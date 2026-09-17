@@ -87,6 +87,9 @@ class AnswerEvaluationRunnerTest(unittest.TestCase):
                 "ORION-27",
                 "internal codename"
             ],
+            "forbidden_phrases": [
+                "Project Aurora"
+            ],
             "expect_abstention": False
         }
 
@@ -119,6 +122,7 @@ class AnswerEvaluationRunnerTest(unittest.TestCase):
         mock_evaluate_answer.assert_called_once_with(
             answer=answer,
             expected_phrases=case["expected_phrases"],
+            forbidden_phrases=case["forbidden_phrases"],
             expect_abstention=False
         )
         self.assertEqual(
