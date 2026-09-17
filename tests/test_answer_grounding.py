@@ -48,6 +48,34 @@ class AnswerGroundingEvaluationTest(unittest.TestCase):
             )
         )
 
+    def test_fails_when_answer_contains_a_forbidden_fact(self):
+        evaluation = evaluate_answer(
+            answer=(
+                "ORION-27 is the internal codename. "
+                "It is also the Project Aurora assistant."
+            ),
+            expected_phrases=[
+                "ORION-27",
+                "internal codename"
+            ],
+            forbidden_phrases=[
+                "Project Aurora"
+            ]
+        )
+
+        self.assertFalse(
+            evaluation.passed
+        )
+        self.assertTrue(
+            any(
+                "forbidden phrase"
+                in failure.lower()
+                and "project aurora"
+                in failure.lower()
+                for failure in evaluation.failures
+            )
+        )
+
     def test_fails_when_answer_contains_a_source_reference(self):
         evaluation = evaluate_answer(
             answer=(
