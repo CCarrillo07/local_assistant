@@ -6,6 +6,7 @@ from rag.embedder import OllamaEmbedder
 from rag.service import RAGService
 from rag.vector_store_factory import create_vector_store
 from rag.reranker_factory import create_reranker
+from rag.citations import format_sources
 
 logger = get_logger(__name__)
 
@@ -214,12 +215,16 @@ def main():
         # model_message contains the augmented prompt when relevant document
         # context is found. It stays None for a normal general-assistant call.
         model_message = None
+        rag_context = None
 
         if rag_enabled and rag_service is not None:
 
-            model_message = rag_service.build_prompt(
+            rag_context = rag_service.build_context(
                 user_input
             )
+
+            if rag_context is not None:
+                model_message = rag_context.prompt
 
             if model_message is None:
 
@@ -259,6 +264,17 @@ def main():
         except Exception as error:
 
             print(f"\nError: {error}")
+
+        if rag_context is not None:
+
+            sources = format_sources(
+                rag_context.results
+            )
+
+            if sources:
+                print(sources)
         
+
+
 if __name__ == "__main__":
     main()

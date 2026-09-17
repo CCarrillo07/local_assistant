@@ -10,7 +10,7 @@ from rag.prompt import build_rag_prompt
 from rag.vector_store import InMemoryVectorStore
 from rag.vector_store_base import VectorStore
 from rag.reranker_base import Reranker
-from rag.models import SearchResult
+from rag.models import RAGContext, SearchResult
 
 logger = get_logger(__name__)
 
@@ -175,7 +175,22 @@ class RAGService:
         question: str
     ) -> str | None:
         """Build a grounded prompt from retrieved document chunks."""
+
+        context = self.build_context(
+            question
+        )
+
+        if context is None:
+            return None
         
+        return context.prompt
+
+    def build_context(
+        self,
+        question: str
+    ) -> RAGContext | None :
+        """Keep a grounder prompt with its supporting results."""
+
         results = self.retrieve(
             question
         )
@@ -183,10 +198,16 @@ class RAGService:
         if not results:
             return None
 
-        return build_rag_prompt(
+        prompt = build_rag_prompt(
             question=question,
             results=results
         )
+
+        return RAGContext(
+            prompt=prompt,
+            results=results
+        )
+
 
     def retrieve(
         self,
