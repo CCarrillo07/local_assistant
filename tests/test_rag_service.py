@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import Mock, patch
 
 from rag.service import RAGService
-from rag.models import Chunk, Document
+from rag.models import Chunk, Document, SearchResult
 from rag.vector_store_base import VectorStore
 
 class FakeEmbedder:
@@ -28,6 +28,92 @@ class FakeEmbedder:
         return [1.0, 0.0]
     
 class RAGServiceTest(unittest.TestCase):
+
+    @patch("rag.service.build_rag_prompt")
+    def test_build_prompt_reranks_retrieval_candidates(
+        self,
+        mock_build_rag_prompt
+    ):
+        """Rerank a wider candidate set before building the prompt."""
+
+        question = "What is ORION-27?"
+
+        first_candidate = SearchResult(
+            chunk=Chunk(
+                text="Unrelated Aurora information.",
+                source="aurora.txt",
+                page=None,
+                chunk_index=0
+            ),
+            score=0.80
+        )
+
+        relevant_candidate = SearchResult(
+            chunk=Chunk(
+                text=(
+                    "ORION-27 is the internal codename "
+                    "for the example RAG knowledge base."
+                ),
+                source="rag_test_notes.txt",
+                page=None,
+                chunk_index=1
+            ),
+            score=0.70
+        )
+
+        candidates = [
+            first_candidate,
+            relevant_candidate
+        ]
+        reranked_results = [
+            relevant_candidate
+        ]
+
+        vector_store = Mock(
+            spec=VectorStore
+        )
+        vector_store.search.return_value = candidates
+
+        reranker = Mock()
+        reranker.rerank.return_value = reranked_results
+        mock_build_rag_prompt.return_value = "RAG prompt"
+
+        service = RAGService(
+            document_directory="documents",
+            embedder=FakeEmbedder(),
+            vector_store=vector_store,
+            reranker=reranker,
+            candidate_k=5,
+            top_k=1,
+            min_score=0.42
+        )
+        service.initialized = True
+
+        prompt = service.build_prompt(
+            question
+        )
+
+        self.assertEqual(
+            prompt,
+            "RAG prompt"
+        )
+
+        vector_store.search.assert_called_once_with(
+            query=question,
+            top_k=5,
+            min_score=0.42
+        )
+
+        reranker.rerank.assert_called_once_with(
+            question=question,
+            results=candidates,
+            top_k=1
+        )
+
+        mock_build_rag_prompt.assert_called_once_with(
+            question=question,
+            results=reranked_results
+        )
     
     def test_requires_initialization_before_building_prompt(self):
         
