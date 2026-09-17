@@ -119,29 +119,37 @@ class QdrantVectorStore(VectorStore):
         chunks: list[Chunk],
         fingerprint: str
     ) -> None:
-        """Replace the Qdrant collection with the supplied chunks."""
+        """Replace all stored chunks with a newly generated index."""
         
         # Generate embeddings before removing the existing collection.
         # If Ollama fails, the previous collection remains available.
         embeddings = self._embed_chunks(chunks)
-                
-        if self.client.collection_exists(
+
+        collection_exists = self.client.collection_exists(
             self.collection_name
-        ):
-            self.client.delete_collection(
-                collection_name=self.collection_name
-            )
+        )
+
+        if collection_exists:
+
+            # Deleting the collection itself can leave its SQLite file
+            # locked in Qdrant local mode on Windows. Clearing its points
+            # provides the same replacement behavior without removing
+            # the underlying database filed
+
+            self._clear_collection()
         
         if not embeddings:
             logger.info(
-                "No chunks were provided for the Qdrant collection"
+                "No chunks cleared because no chunks "
+                "were available"
             )
             return
                 
-        self._create_collection(
-            vector_size=len(embeddings[0])
-        )
-        
+        if not collection_exists:
+            self._create_collection(
+                vector_size=len(embeddings[0])
+            )
+
         self._upsert_chunks(
             chunks=chunks,
             embeddings=embeddings,
@@ -296,3 +304,31 @@ class QdrantVectorStore(VectorStore):
             len(points),
             self.collection_name
         )
+
+    def _clear_collection(self) -> None:
+        """Delete every point while preserving the collection itself."""
+
+        while True:
+
+            #Always read the first remaining page. After deleting it,
+            # the next iteration reads the new first page.
+            points, _ = self.client.scroll(
+                collection_name=self.collection_name,
+                limit=256,
+                with_payload=False,
+                with_vectors=False
+            )
+
+            if not points:
+                return
+
+            self.client.delete(
+                collection_name=self.collection_name,
+                points_selector=models.PointIdsList(
+                    points=[
+                        point.id 
+                        for point in points
+                    ]
+                ),
+                wait=True
+            )
