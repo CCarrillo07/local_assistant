@@ -27,6 +27,24 @@ class FakeEmbedder:
             
         return [0.0, 1.0]
     
+class TrackingEmbedder(FakeEmbedder):
+    
+    def __init__(self):
+        self.embedded_batches: list[list[str]] = []
+    
+    def embed_texts(
+        self,
+        texts: list[str]
+    ) -> list[list[float]]:
+        self.embedded_batches.append(
+            list(texts)
+        )
+        
+        return super().embed_texts(
+            texts
+        )
+
+
 class QdrantVectorStoreTest(unittest.TestCase):
     
     def test_rebuilds_restores_and_searches_collection(
@@ -226,6 +244,93 @@ class QdrantVectorStoreTest(unittest.TestCase):
                     )
                 )
 
+            finally:
+                store.close()
+    
+    def test_synchronize_updates_only_changed_chunks(self):
+        """Reuse unchanged vectors while reconciling the collection."""
+        
+        unchanged_chunk = Chunk(
+            text="ORION-27 is the internal codename.",
+            source="notes.txt",
+            page=None,
+            chunk_index=0
+        )
+        deleted_chunk = Chunk(
+            text="This document will be deleted.",
+            source="deleted.txt",
+            page=None,
+            chunk_index=0
+        )
+        new_chunk = Chunk(
+            text="This document was added later.",
+            source="new.txt",
+            page=None,
+            chunk_index=0
+        )
+        
+        with TemporaryDirectory() as temporary_directory:
+            embedder = TrackingEmbedder()
+            store = QdrantVectorStore(
+                embedder=embedder,
+                path=(
+                    Path(temporary_directory)
+                    / "qdrant"
+                ),
+                collection_name="test_documents"
+            )
+            
+            try:
+                store.rebuild(
+                    chunks=[
+                        unchanged_chunk,
+                        deleted_chunk
+                    ],
+                    fingerprint="old-fingerprint"
+                )
+                
+                embedder.embedded_batches.clear()
+                
+                store.synchronize(
+                    chunks=[
+                        unchanged_chunk,
+                        new_chunk
+                    ],
+                    fingerprint="new-fingerprint"
+                )
+                
+                self.assertEqual(
+                    embedder.embedded_batches,
+                    [[new_chunk.text]]
+                )
+                self.assertEqual(
+                    store.size,
+                    2
+                )
+                self.assertTrue(
+                    store.restore(
+                        "new-fingerprint"
+                    )
+                )
+                
+                results = store.search(
+                    query="ORION-27",
+                    top_k=10,
+                    min_score=None
+                )
+                stored_sources = {
+                    result.chunk.source
+                    for result in results
+                }
+                
+                self.assertEqual(
+                    stored_sources,
+                    {
+                        "notes.txt",
+                        "new.txt"
+                    }
+                )
+                
             finally:
                 store.close()
                                  
