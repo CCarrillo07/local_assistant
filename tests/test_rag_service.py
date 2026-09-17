@@ -297,7 +297,12 @@ class RAGServiceTest(unittest.TestCase):
         )
         
         self.assertIn(
-            "rag_test_notes.txt, chunk 0",
+            "[Context passage 1]",
+            prompt
+        )
+
+        self.assertNotIn(
+            "rag_test_notes.txt",
             prompt
         )
         
