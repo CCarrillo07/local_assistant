@@ -10,6 +10,7 @@ from rag.prompt import build_rag_prompt
 from rag.vector_store import InMemoryVectorStore
 from rag.vector_store_base import VectorStore
 from rag.reranker_base import Reranker
+from rag.models import SearchResult
 
 logger = get_logger(__name__)
 
@@ -173,13 +174,32 @@ class RAGService:
         self,
         question: str
     ) -> str | None:
+        """Build a grounded prompt from retrieved document chunks."""
         
+        results = self.retrieve(
+            question
+        )
+
+        if not results:
+            return None
+
+        return build_rag_prompt(
+            question=question,
+            results=results
+        )
+
+    def retrieve(
+        self,
+        question: str
+    ) -> list[SearchResult]:
+        """Retrieve, rerank, and filter document chunks."""
+
         if not self.initialized:
             raise RuntimeError(
-                "RAG service must be initialized "
+                "RAG Service must be initialized "
                 "before processing questions"
             )
-            
+
         retrieval_k = (
             self.candidate_k
             if self.reranker is not None
@@ -192,23 +212,14 @@ class RAGService:
             min_score=self.min_score
         )
 
-        if not results:
-            return None
-
-        if self.reranker is not None:
-
+        if (
+            self.reranker is not None
+            and results
+        ):
             results = self.reranker.rerank(
                 question=question,
                 results=results,
                 top_k=self.top_k
             )
 
-            # The reranker may reject every candidate when none
-            # is sufficiently relevant to the question
-            if not results:
-                return None
-
-        return build_rag_prompt(
-            question=question,
-            results=results
-        )
+        return results

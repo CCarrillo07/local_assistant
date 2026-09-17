@@ -5,6 +5,7 @@ from config import CONFIG
 from rag.embedder import OllamaEmbedder
 from rag.service import RAGService
 from rag.vector_store_factory import create_vector_store
+from rag.reranker_factory import create_reranker
 
 CASES_PATH = Path(__file__).with_name(
     "rag_cases.json"
@@ -39,6 +40,10 @@ def main() -> int:
         config=rag_config,
         embedder=embedder
     )
+
+    reranker = create_reranker(
+        config=rag_config
+    )
     
     rag_service = RAGService(
         document_directory=rag_config.document_directory,
@@ -47,7 +52,9 @@ def main() -> int:
         chunk_size=rag_config.chunk_size,
         overlap=rag_config.overlap,
         top_k=rag_config.top_k,
-        min_score=rag_config.min_score
+        min_score=rag_config.min_score,
+        reranker=reranker,
+        candidate_k=rag_config.candidate_k
     )
     
     cases = load_cases()
@@ -61,10 +68,8 @@ def main() -> int:
             expected_source = case["expected_source"]
             expected_phrase = case["expected_phrase"]
             
-            results = vector_store.search(
-                query=question,
-                top_k=rag_config.top_k,
-                min_score=rag_config.min_score
+            results = rag_service.retrieve(
+                question
             )
             
             # A null expected source means that the question

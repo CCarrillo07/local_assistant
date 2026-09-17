@@ -5,6 +5,7 @@ from logger import get_logger
 from rag.embedder import OllamaEmbedder
 from rag.service import RAGService
 from rag.vector_store_factory import create_vector_store
+from rag.reranker_factory import create_reranker
 
 logger = get_logger(__name__)
 
@@ -69,6 +70,10 @@ def main():
             embedder=embedder
         )
 
+        reranker = create_reranker(
+            config=rag_config
+        ) 
+
         rag_service = RAGService(
             document_directory=rag_config.document_directory,
             embedder=embedder,
@@ -76,7 +81,9 @@ def main():
             chunk_size=rag_config.chunk_size,
             overlap=rag_config.overlap,
             top_k=rag_config.top_k,
-            min_score=rag_config.min_score
+            min_score=rag_config.min_score,
+            reranker=reranker,
+            candidate_k=rag_config.candidate_k
         )
 
         # Auto and required modes need the document index immediately because

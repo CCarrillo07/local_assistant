@@ -23,12 +23,12 @@ class RAGConfig:
     top_k: int = 2
     min_score: float = 0.42
     candidate_k: int = 5
-    reranker_enabled: bool = False
+    reranker_enabled: bool = True
     reranker_backend: str = "flashrank"
     reranker_model: str = "ms-marco-MiniLM-L-12-v2"
     reranker_cache_dir: str = "storage/flashrank"
     reranker_max_length: int = 128
-    reranker_min_score: float | None = None
+    reranker_min_score: float | None = 0.10
 
     def __post_init__(self) -> None:
 
