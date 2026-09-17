@@ -28,6 +28,25 @@ class AnswerGroundingEvaluationTest(unittest.TestCase):
             []
         )
 
+    def test_ignores_markdown_emphasis_in_expected_facts(self):
+        evaluation = evaluate_answer(
+            answer=(
+                "Eligible employees receive **18** "
+                "paid leave days each year."
+            ),
+            expected_phrases=[
+                "18 paid leave days"
+            ]
+        )
+
+        self.assertTrue(
+            evaluation.passed
+        )
+        self.assertEqual(
+            evaluation.failures,
+            []
+        )
+
     def test_fails_when_answer_omits_an_expected_fact(self):
         evaluation = evaluate_answer(
             answer="Project Aurora is a local AI assistant.",
