@@ -7,7 +7,10 @@ from rag.service import RAGService
 from rag.vector_store_factory import create_vector_store
 from rag.reranker_factory import create_reranker
 from rag.citations import format_sources
-from memory.factory import create_short_term_memory
+from memory.factory import (
+    create_short_term_memory,
+    create_long_term_memory
+)
 
 logger = get_logger(__name__)
 
@@ -50,6 +53,10 @@ def main():
     )
 
     conversation_memory = create_short_term_memory(
+        config=CONFIG.memory
+    )
+
+    long_term_memory = create_long_term_memory(
         config=CONFIG.memory
     )
 
@@ -117,6 +124,10 @@ def main():
         print("/rag on")
         print("/rag off")
         print("/rag status")
+    if long_term_memory is not None:
+        print("/remember <fact>")
+        print("/memories")
+        print("/forget <id>")
     print("/reset")
     print("/exit")
 
@@ -131,6 +142,115 @@ def main():
         # Commands handled directly by the application are not sent to the LLM.
         if user_input.lower() in {"exit", "/exit"}:
             break
+
+        if (
+            user_input.lower() == "/remember"
+            or user_input.lower().startswith(
+                "/remember "
+            )
+        ):
+            if long_term_memory is None:
+                print(
+                    "\nLong-term memory is not available"
+                )
+                continue
+
+            parts = user_input.split(
+                maxsplit=1
+            )
+
+            if len(parts) != 2 or not parts[1].strip():
+                print(
+                    "\nUsage: /remember <fact>"
+                )
+                continue
+
+            memory = long_term_memory.remember(
+                parts[1]
+            )
+
+            print(
+                f"\nMemory saved "
+                f"[{memory.memory_id}]: "
+                f"{memory.content}"
+            )
+
+            continue
+
+        if user_input.lower() == "/memories":
+            if long_term_memory is None:
+                print(
+                    "\nLong-term memory is not available."
+                )
+                continue
+
+            memories = (
+                long_term_memory.list_memories()
+            )
+
+            if not memories:
+                print(
+                    "\nNo long-term memories saved."
+                )
+                continue
+
+            print(
+                "\nLong-term memories:"
+            )
+
+            for memory in memories:
+                print(
+                    f"[{memory.memory_id}] "
+                    f"{memory.content}"
+                )
+
+            continue
+
+        if (
+            user_input.lower() == "/forget"
+            or user_input.lower().startswith(
+                "/forget"
+            )
+        ):
+            if long_term_memory is None:
+                print(
+                    "\nLong-term memory is not available"
+                )
+                continue
+
+            parts = user_input.split(
+                maxsplit=1
+            )
+
+            try: 
+                memory_id = int(parts[1])
+
+                if memory_id <= 0:
+                    raise ValueError
+
+            except (
+                IndexError,
+                ValueError
+            ):
+                print(
+                    "\nUsage: /forget <id>"
+                )
+                continue
+
+            forgotten = long_term_memory.forget(
+                memory_id
+            )
+
+            if forgotten:
+                print(
+                    f"\nMemory {memory_id} forgotten"
+                )
+
+            else:
+                print(
+                    f"\nMemory {memory_id} was not found"
+                )
+            continue
 
         if user_input.lower() == "/reset":
             assistant.reset()
