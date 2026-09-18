@@ -11,6 +11,9 @@ from memory.factory import (
     create_short_term_memory,
     create_long_term_memory
 )
+from memory.context import (
+    build_long_term_memory_message
+)
 
 logger = get_logger(__name__)
 
@@ -374,13 +377,36 @@ def main():
 
                     continue
 
+        context_messagges = []
+
+        if (
+            long_term_memory is not None
+            and model_message is None
+        ):
+            memory_message = (
+                build_long_term_memory_message(
+                    memories=(
+                        long_term_memory.list_memories()
+                    ),
+                    max_memories=(
+                        CONFIG.memory.long_term_context_limit
+                    )
+                )
+            )
+
+            if memory_message is not None:
+                context_messagges.append(
+                    memory_message
+                )
+
         print("\nAssistant: ")
 
         # Stream response fragments as the local model generates them.
         try:
             for text in assistant.send_message(
                 user_message=user_input,
-                model_message=model_message
+                model_message=model_message,
+                context_messages=context_messagges
             ):
                 print(text, end="", flush=True)
 
@@ -400,7 +426,5 @@ def main():
             if sources:
                 print(sources)
         
-
-
 if __name__ == "__main__":
     main()
