@@ -339,6 +339,61 @@ class RAGServiceTest(unittest.TestCase):
             prompt
         )
         
+    @patch("rag.service.chunk_documents")
+    @patch("rag.service.load_documents")
+    def test_initialize_synchronizes_outdated_index(
+        self,
+        mock_load_documents,
+        mock_chunk_documents
+    ):
+        """Reconcile document changes through the vector-store contract."""
+        
+        documents = [
+            Document(
+                text="Updated document",
+                source="updated.txt"
+            )
+        ]
+        chunks = [
+            Chunk(
+                text="Updated document",
+                source="updated.txt",
+                page=None,
+                chunk_index=0
+            )
+        ]
+        
+        mock_load_documents.return_value = documents
+        mock_chunk_documents.return_value = chunks
+        
+        vector_store = Mock()
+        vector_store.restore.return_value = False
+        vector_store.size = 1
+        
+        service = RAGService(
+            document_directory="documents",
+            embedder=FakeEmbedder(),
+            vector_store=vector_store,
+            chunk_size=100,
+            overlap=20
+        )
+        
+        with patch.object(
+            service,
+            "_calculate_index_fingerprint",
+            return_value="updated-fingerprint"
+        ):
+            service.initialize()
+        
+        self.assertTrue(
+            service.initialized
+        )
+        vector_store.synchronize.assert_called_once_with(
+            chunks=chunks,
+            fingerprint="updated-fingerprint"
+        )
+        vector_store.rebuild.assert_not_called()
+        
     @patch("rag.service.load_documents")
     def test_initialize_reuses_restored_index(
         self,
