@@ -107,7 +107,7 @@ class MemoryConfig:
     short_term_max_turns: int = 10
 
     def __post_init__(self) -> None:
-        if self.short_term_max_turns <=0:
+        if self.short_term_max_turns <= 0:
             raise ValueError(
                 "short_term_max_turns must be positive"
             )
