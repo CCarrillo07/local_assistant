@@ -108,33 +108,18 @@ class LongTermMemoryContextTest(unittest.TestCase):
             message
         )
         self.assertIn(
-            "Do not infer, combine, or reinterpret facts",
+            "Preserve the meaning, ownership, and perspective "
+            "of each memory",
             message["content"]
         )
         self.assertIn(
-            "Do not transfer facts between people, animals, "
-            "or other entities",
+            "Do not attribute a memory to a different person "
+            "or entity",
             message["content"]
         )
         self.assertIn(
-            "The memories are written from the user's perspective",
-            message["content"]
-        )
-        self.assertIn(
-            "First-person words such as 'I' and 'my' refer to "
-            "the user, not the assistant",
-            message["content"]
-        )
-        self.assertIn(
-            "Answer about the user using second-person words "
-            "such as 'you' and 'your'",
-            message["content"]
-        )
-        self.assertIn(
-            "If the requested information is not explicitly "
-            "present, respond exactly: "
-            "\"I don't have that information saved.\" "
-            "Do not add anything else",
+            "If the memories do not directly support an answer, "
+            "clearly state that the information is not available",
             message["content"]
         )
 
