@@ -1,13 +1,33 @@
 import unittest
+from collections.abc import Iterator
 
 from assistant import Assistant
 from config import MemoryConfig
 from memory.context import (
     build_long_term_memory_message
 )
+from llm.base import LLMProvider, Message
 from memory.long_term_base import MemoryRecord
 from memory.short_term import SlidingWindowMemory
-from tests.test_assistant import FakeLLMProvider
+
+
+class FakeLLMProvider(LLMProvider):
+
+    def __init__(self):
+        self.messages_received: list[Message] = []
+
+    def stream_chat(
+        self,
+        messages: list[Message]
+    ) -> Iterator[str]:
+        self.messages_received = messages
+        yield "Test response"
+
+    def set_model(
+        self,
+        model: str
+    ) -> None:
+        pass
 
 
 class LongTermMemoryContextTest(unittest.TestCase):
