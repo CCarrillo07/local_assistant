@@ -117,8 +117,24 @@ class LongTermMemoryContextTest(unittest.TestCase):
             message["content"]
         )
         self.assertIn(
+            "The memories are written from the user's perspective",
+            message["content"]
+        )
+        self.assertIn(
+            "First-person words such as 'I' and 'my' refer to "
+            "the user, not the assistant",
+            message["content"]
+        )
+        self.assertIn(
+            "Answer about the user using second-person words "
+            "such as 'you' and 'your'",
+            message["content"]
+        )
+        self.assertIn(
             "If the requested information is not explicitly "
-            "present, say: \"I don't have that information saved.\"",
+            "present, respond exactly: "
+            "\"I don't have that information saved.\" "
+            "Do not add anything else",
             message["content"]
         )
 
