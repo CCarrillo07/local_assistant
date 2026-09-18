@@ -105,12 +105,30 @@ class RAGConfig:
 class MemoryConfig:
     short_term_enabled: bool = True
     short_term_max_turns: int = 10
+    long_term_enabled: bool = True
+    long_term_backend: str = "sqlite"
+    long_term_database_path: str = (
+        "storage/long_term_memory.db"
+    )
 
     def __post_init__(self) -> None:
         if self.short_term_max_turns <= 0:
             raise ValueError(
                 "short_term_max_turns must be positive"
             )
+
+        valid_long_term_backends = {
+            "sqlite"
+        }
+
+        if (
+            self.long_term_backend
+            not in valid_long_term_backends
+        ):
+            raise ValueError(
+                "Invalid long-term memory backend: "
+                f"{self.long_term_backend}"
+                )
 
 @dataclass(frozen=True)
 class AppConfig:
