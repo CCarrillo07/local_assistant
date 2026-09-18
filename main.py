@@ -7,6 +7,7 @@ from rag.service import RAGService
 from rag.vector_store_factory import create_vector_store
 from rag.reranker_factory import create_reranker
 from rag.citations import format_sources
+from memory.factory import create_short_term_memory
 
 logger = get_logger(__name__)
 
@@ -48,9 +49,14 @@ def main():
         host=CONFIG.ollama_host
     )
 
+    conversation_memory = create_short_term_memory(
+        config=CONFIG.memory
+    )
+
     assistant = Assistant(
         llm=provider,
-        system_prompt=SYSTEM_PROMPT
+        system_prompt=SYSTEM_PROMPT,
+        memory=conversation_memory
     )
 
     # The RAG service is created only when the module is available for this

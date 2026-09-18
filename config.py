@@ -101,15 +101,28 @@ class RAGConfig:
                 "0.0 and 1.0"
             )
 
+@dataclass(frozen=True)
+class MemoryConfig:
+    short_term_enabled: bool = True
+    short_term_max_turns: int = 10
+
+    def __post_init__(self) -> None:
+        if self.short_term_max_turns <=0:
+            raise ValueError(
+                "short_term_max_turns must be positive"
+            )
 
 @dataclass(frozen=True)
 class AppConfig:
     ollama_host: str = "http://localhost:11434"
     default_model: str = MODELS["main"]
+    memory: MemoryConfig = field(
+        default_factory=MemoryConfig
+    )
     rag: RAGConfig = field(
         default_factory=RAGConfig
     )
-    
+
 CONFIG = AppConfig()
 
 def resolve_model(name: str) -> str:
