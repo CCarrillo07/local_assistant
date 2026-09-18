@@ -245,6 +245,8 @@ def main():
             )
 
             if forgotten:
+                assistant.reset()
+                
                 print(
                     f"\nMemory {memory_id} forgotten"
                 )
