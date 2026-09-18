@@ -377,7 +377,7 @@ def main():
 
                     continue
 
-        context_messagges = []
+        context_messages = []
 
         if (
             long_term_memory is not None
@@ -395,7 +395,7 @@ def main():
             )
 
             if memory_message is not None:
-                context_messagges.append(
+                context_messages.append(
                     memory_message
                 )
 
@@ -406,7 +406,7 @@ def main():
             for text in assistant.send_message(
                 user_message=user_input,
                 model_message=model_message,
-                context_messages=context_messagges
+                context_messages=context_messages
             ):
                 print(text, end="", flush=True)
 

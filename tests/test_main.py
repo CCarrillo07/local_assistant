@@ -3,11 +3,11 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 import main
-from config import AppConfig, RAGConfig
+from config import AppConfig, MemoryConfig, RAGConfig
 
 
 class MainRAGModeTest(unittest.TestCase):
-    
+
     @patch(
         "builtins.input",
         side_effect=["/exit"]
@@ -26,6 +26,10 @@ class MainRAGModeTest(unittest.TestCase):
     ):
         test_config = AppConfig(
             default_model="test-model",
+            memory=MemoryConfig(
+                short_term_enabled=False,
+                long_term_enabled=False
+            ),
             rag=RAGConfig(
                 available=True,
                 mode="required",
@@ -34,21 +38,21 @@ class MainRAGModeTest(unittest.TestCase):
                 reranker_enabled=False
             )
         )
-        
+
         mock_rag_service = (
             mock_rag_service_class.return_value
         )
-        
+
         with patch.object(
             main,
             "CONFIG",
             test_config
         ):
             main.main()
-            
+
         mock_rag_service_class.assert_called_once()
         mock_rag_service.initialize.assert_called_once_with()
-        
+
     @patch(
         "builtins.input",
         side_effect=[
@@ -73,6 +77,10 @@ class MainRAGModeTest(unittest.TestCase):
     ):
         test_config = AppConfig(
             default_model="test-model",
+            memory=MemoryConfig(
+                short_term_enabled=False,
+                long_term_enabled=False
+            ),
             rag=RAGConfig(
                 available=True,
                 mode="required",
@@ -81,7 +89,7 @@ class MainRAGModeTest(unittest.TestCase):
                 reranker_enabled=False
             )
         )
-        
+
         mock_rag_service = (
             mock_rag_service_class.return_value
         )
@@ -91,33 +99,34 @@ class MainRAGModeTest(unittest.TestCase):
                 results=[]
             )
         )
-        
+
         mock_assistant = mock_assistant_class.return_value
         mock_assistant.send_message.return_value = iter(
             ["Grounded answer"]
         )
-        
+
         with patch.object(
             main,
             "CONFIG",
             test_config
         ):
             main.main()
-            
+
         mock_print.assert_any_call(
             "\nRAG controls are not available "
             "in this deployment."
         )
-        
+
         mock_rag_service.build_context.assert_called_once_with(
             "What is ORION-27?"
         )
-        
+
         mock_assistant.send_message.assert_called_once_with(
             user_message="What is ORION-27?",
-            model_message="Augmented RAG prompt"
+            model_message="Augmented RAG prompt",
+            context_messages=[]
         )
-        
+
     @patch(
         "builtins.input",
         side_effect=[
@@ -141,6 +150,10 @@ class MainRAGModeTest(unittest.TestCase):
     ):
         test_config = AppConfig(
             default_model="test-model",
+            memory=MemoryConfig(
+                short_term_enabled=False,
+                long_term_enabled=False
+            ),
             rag=RAGConfig(
                 available=True,
                 mode="required",
@@ -149,28 +162,28 @@ class MainRAGModeTest(unittest.TestCase):
                 reranker_enabled=False
             )
         )
-        
+
         mock_rag_service = (
             mock_rag_service_class.return_value
         )
-        
+
         mock_rag_service.build_context.return_value = None
 
         mock_assistant = mock_assistant_class.return_value
-        
+
         with patch.object(
             main,
             "CONFIG",
             test_config
         ):
             main.main()
-            
+
         mock_rag_service.build_context.assert_called_once_with(
             "How do I bake a chocolate cake?"
         )
-        
+
         mock_assistant.send_message.assert_not_called()
-        
+
         mock_print.assert_any_call(
             "The answer could not be found "
             "in the documents."
@@ -188,7 +201,7 @@ class MainRAGModeTest(unittest.TestCase):
     @patch("main.Assistant")
     @patch("main.OllamaProvider")
     def test_auto_mode_uses_general_assistant_without_context(
-        self, 
+        self,
         mock_provider_class,
         mock_assistant_class,
         mock_embedder_class,
@@ -197,6 +210,10 @@ class MainRAGModeTest(unittest.TestCase):
     ):
         test_config = AppConfig(
             default_model="test-model",
+            memory=MemoryConfig(
+                short_term_enabled=False,
+                long_term_enabled=False
+            ),
             rag=RAGConfig(
                 available=True,
                 mode="auto",
@@ -231,7 +248,8 @@ class MainRAGModeTest(unittest.TestCase):
 
         mock_assistant.send_message.assert_called_once_with(
             user_message="How do I bake a chocolate cake?",
-            model_message=None
+            model_message=None,
+            context_messages=[]
         )
 
     @patch(
@@ -256,6 +274,10 @@ class MainRAGModeTest(unittest.TestCase):
     ):
         test_config = AppConfig(
             default_model="test-model",
+            memory=MemoryConfig(
+                short_term_enabled=False,
+                long_term_enabled=False
+            ),
             rag=RAGConfig(
                 available=True,
                 mode="manual",
@@ -300,8 +322,6 @@ class MainRAGModeTest(unittest.TestCase):
             reranker=mock_reranker,
             candidate_k=test_config.rag.candidate_k
         )
-    
-        
 
     @patch(
         "builtins.input",
@@ -334,6 +354,10 @@ class MainRAGModeTest(unittest.TestCase):
 
         test_config = AppConfig(
             default_model="test-model",
+            memory=MemoryConfig(
+                short_term_enabled=False,
+                long_term_enabled=False
+            ),
             rag=RAGConfig(
                 available=True,
                 mode="required",
@@ -382,7 +406,8 @@ class MainRAGModeTest(unittest.TestCase):
 
         mock_assistant.send_message.assert_called_once_with(
             user_message="What is ORION-27?",
-            model_message="Augmented RAG prompt"
+            model_message="Augmented RAG prompt",
+            context_messages=[]
         )
 
         mock_format_sources.assert_called_once_with(
@@ -393,6 +418,7 @@ class MainRAGModeTest(unittest.TestCase):
             "Sources:\n"
             "- rag_test_notes.txt"
         )
+
 
 if __name__ == "__main__":
     unittest.main()
