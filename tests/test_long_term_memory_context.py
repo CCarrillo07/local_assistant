@@ -87,6 +87,41 @@ class LongTermMemoryContextTest(unittest.TestCase):
             message["content"]
         )
 
+    def test_requires_literal_memory_grounding(self):
+        """Prevent unsupported identity and relationship inferences."""
+
+        message = build_long_term_memory_message(
+            memories=[
+                MemoryRecord(
+                    memory_id=1,
+                    content="My wife's name is Andy"
+                ),
+                MemoryRecord(
+                    memory_id=2,
+                    content="My puppy is named Happy"
+                )
+            ],
+            max_memories=2
+        )
+
+        self.assertIsNotNone(
+            message
+        )
+        self.assertIn(
+            "Do not infer, combine, or reinterpret facts",
+            message["content"]
+        )
+        self.assertIn(
+            "Do not transfer facts between people, animals, "
+            "or other entities",
+            message["content"]
+        )
+        self.assertIn(
+            "If the requested information is not explicitly "
+            "present, say: \"I don't have that information saved.\"",
+            message["content"]
+        )
+
     def test_returns_none_when_no_memories_exist(self):
         """Avoid adding an empty system message to every request."""
 
