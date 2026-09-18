@@ -188,6 +188,54 @@ class MainLongTermMemoryCommandTest(unittest.TestCase):
     @patch(
         "builtins.input",
         side_effect=[
+            "/forget 7",
+            "/forget 999",
+            "/exit"
+        ]
+    )
+    @patch("builtins.print")
+    @patch(
+        "main.create_long_term_memory",
+        create=True
+    )
+    @patch("main.Assistant")
+    @patch("main.OllamaProvider")
+    def test_successful_forget_clears_short_term_memory(
+        self,
+        mock_provider_class,
+        mock_assistant_class,
+        mock_long_term_factory,
+        mock_print,
+        mock_input
+    ):
+        """Clear conversation context only after a successful deletion."""
+
+        store = mock_long_term_factory.return_value
+        store.forget.side_effect = [
+            True,
+            False
+        ]
+        assistant = mock_assistant_class.return_value
+
+        with patch.object(
+            main,
+            "CONFIG",
+            create_test_config()
+        ):
+            main.main()
+
+        self.assertEqual(
+            store.forget.call_args_list,
+            [
+                call(7),
+                call(999)
+            ]
+        )
+        assistant.reset.assert_called_once_with()
+
+    @patch(
+        "builtins.input",
+        side_effect=[
             "/reset",
             "/exit"
         ]
