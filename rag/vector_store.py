@@ -318,3 +318,15 @@ class InMemoryVectorStore(VectorStore):
         ) / denominator
 
         return float(similarity)
+
+    def synchronize(
+        self,
+        chunks: list[Chunk],
+        fingerprint: str
+    ) -> None:
+        """Rebuild because NPZ does not support incremental updates."""
+
+        self.rebuild(
+            chunks=chunks,
+            fingerprint=fingerprint
+        )

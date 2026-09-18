@@ -45,3 +45,12 @@ class VectorStore(ABC):
     ) -> None:
         """Replace the index using the supplied chunks."""
         raise NotImplementedError
+
+    @abstractmethod
+    def synchronize(
+        self,
+        chunks: list[Chunk],
+        fingerprint: str
+    ) -> None:
+        """Reconcile the stored index with the supplied chunks."""
+        raise NotImplementedError

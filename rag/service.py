@@ -158,7 +158,7 @@ class RAGService:
             overlap=self.overlap
         )
         
-        self.vector_store.rebuild(
+        self.vector_store.synchronize(
             chunks=chunks,
             fingerprint=fingerprint
         )
