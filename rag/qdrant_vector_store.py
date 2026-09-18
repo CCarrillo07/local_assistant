@@ -108,7 +108,7 @@ class QdrantVectorStore(VectorStore):
         
         if matching_points != total_points:
             logger.info(
-                "Qdrant collection is outdated; rebuilding"
+                "Qdrant collection is outdated; synchronizing"
             )
             return False
         
