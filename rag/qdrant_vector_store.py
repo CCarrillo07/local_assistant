@@ -264,14 +264,8 @@ class QdrantVectorStore(VectorStore):
         ):
             # The same chunk produces the same UUID, preventing 
             # accidental duplicate records during repetead writes.
-            point_id = str(
-                uuid5(
-                    NAMESPACE_URL,
-                    (
-                        f"{chunk.source}|{chunk.page}|"
-                        f"{chunk.chunk_index}|{chunk.text}"
-                    )
-                )
+            point_id = self._create_point_id(
+                chunk
             )
             
             payload = {
@@ -332,3 +326,120 @@ class QdrantVectorStore(VectorStore):
                 ),
                 wait=True
             )
+
+    def synchronize(
+        self,
+        chunks: list[Chunk],
+        fingerprint: str
+    ) -> None:
+        """Incrementally reconcile stored and supplied chunks."""
+
+        if not self.client.collection_exists(
+            self.collection_name
+        ):
+            self.rebuild(
+                chunks=chunks,
+                fingerprint=fingerprint
+            )
+            return
+
+        existing_point_ids = self._get_point_ids()
+
+        desired_chunks = {
+            self._create_point_id(chunk): chunk
+            for chunk in chunks
+        }
+
+        desired_point_ids = set(desired_chunks)
+
+        new_point_ids = (
+            desired_point_ids - existing_point_ids
+        )
+
+        stale_point_ids = (
+            existing_point_ids - desired_point_ids
+        )
+
+        unchanged_point_ids = (
+            existing_point_ids & desired_point_ids
+        )
+
+        new_chunks = [
+            desired_chunks[point_id]
+            for point_id in new_point_ids
+        ]
+
+        embeddings = self._embed_chunks(
+            new_chunks
+        )
+
+        if new_chunks:
+            self._upsert_chunks(
+                chunks=new_chunks,
+                embeddings=embeddings,
+                fingerprint=fingerprint
+            )
+
+        if stale_point_ids:
+            self.client.delete(
+                collection_name=self.collection_name,
+                points_selector=models.PointIdsList(
+                    points=list(stale_point_ids)
+                ),
+                wait=True
+            )
+
+        if unchanged_point_ids:
+            self.client.set_payload(
+                collection_name=self.collection_name,
+                payload={
+                    "_index_fingerprint": fingerprint
+                },
+                points=list(unchanged_point_ids),
+                wait=True
+            )
+
+    def _create_point_id(
+        self,
+        chunk: Chunk
+    ) -> str:
+        """Generate a stable identifier for a chunk."""
+
+        embedding_identity = (
+            f"{getattr(self.embedder, 'model', self.embedder.__class__.__name__)}|"
+            f"{getattr(self.embedder, 'document_prefix', '')}"
+        )
+
+        return str(
+            uuid5(
+                NAMESPACE_URL,
+                (
+                    f"{embedding_identity}|"
+                    f"{chunk.source}|{chunk.page}|"
+                    f"{chunk.chunk_index}|{chunk.text}"
+                )
+            )
+        )
+
+    def _get_point_ids(self) -> set[str]:
+        """Return every point identifier currently in the collection."""
+
+        point_ids = set()
+        offset = None
+
+        while True:
+            points, offset = self.client.scroll(
+                collection_name=self.collection_name,
+                limit=256,
+                offset=offset,
+                with_payload=False,
+                with_vectors=False
+            )
+
+            point_ids.update(
+                str(point.id)
+                for point in points
+            )
+
+            if offset is None:
+                return point_ids
