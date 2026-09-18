@@ -209,7 +209,7 @@ def main():
         if (
             user_input.lower() == "/forget"
             or user_input.lower().startswith(
-                "/forget"
+                "/forget "
             )
         ):
             if long_term_memory is None:

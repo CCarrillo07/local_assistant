@@ -25,18 +25,28 @@ class Assistant:
     def send_message(
             self, 
             user_message: str, 
-            model_message: str | None = None):
+            model_message: str | None = None,
+            context_messages: list[Message] | None = None
+    ):
+
         message_for_model = (
             model_message
             if model_message is not None
             else user_message
         )
 
+        additional_context = (
+            context_messages
+            if context_messages is not None
+            else []  
+        )
+        
         request_messages: list[Message] = [
             {
                 "role": "system",
                 "content": self.system_prompt
             },
+            *additional_context,
             *self.memory.get_messages(),
             {
                 "role": "user",

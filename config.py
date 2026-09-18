@@ -110,6 +110,7 @@ class MemoryConfig:
     long_term_database_path: str = (
         "storage/long_term_memory.db"
     )
+    long_term_context_limit: int = 20
 
     def __post_init__(self) -> None:
         if self.short_term_max_turns <= 0:
@@ -129,6 +130,11 @@ class MemoryConfig:
                 "Invalid long-term memory backend: "
                 f"{self.long_term_backend}"
                 )
+
+        if self.long_term_context_limit <= 0:
+            raise ValueError(
+                "long_term_context_limit must be positive"
+            )
 
 @dataclass(frozen=True)
 class AppConfig:
